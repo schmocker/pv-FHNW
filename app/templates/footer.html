@@ -1,0 +1,51 @@
+<!-- Footer -->
+
+<footer class="page-footer font-small text-light bg-dark pt-4 mt-3 d-none">
+
+    <!-- Footer Elements -->
+    <div class="container">
+        <!--Grid row-->
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Created by:</h6>
+                <ul>
+                    <li>Tobias Schmocker</li>
+                    <li>Janick Lehman</li>
+                    <li>Marc Gantenbein</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>External Links</h6>
+                <ul>
+                    <li>
+                        <a href="https://www.fhnw.ch/de/die-fhnw/hochschulen/ht/institute/institut-fuer-biomasse-und-ressourceneffizienz">
+                            Institut für Biomasse und Ressourceneffizienz</a></li>
+                    <li><a href="https://www.fhnw.ch/de/studium/technik/energie-umwelttechnik">
+                        Energie- und Umwelttechnik</a></li>
+                </ul>
+            </div>
+        </div>
+        <!--Grid row-->
+    </div>
+    <!-- Footer Elements -->
+
+    <!-- Copyright -->
+    <div class="footer-copyright text-center py-3">© 2019 Copyright:
+        <a href="https://www.fhnw.ch"> Fachhochschule Nordwestschweiz</a>
+    </div>
+    <!-- Copyright -->
+
+</footer>
+<!-- Footer -->
+
+<script>
+    $(function () {
+        let f = $('footer');
+        f.removeClass('d-none');
+        if ($(document.body).height() < ($(window).height() - f.height())) {
+            f.attr('style', 'position: fixed!important; bottom: 0px; width: 100%;');
+        } else {
+            f.attr('style', 'position: relative');
+        }
+    });
+</script>

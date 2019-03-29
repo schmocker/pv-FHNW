@@ -1,0 +1,47 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="{{ url_for('main.home') }}">
+        <img src="{{ url_for('static', filename='img/logos/FHNW.png') }}" height="30px"
+             class="d-inline-block align-center mr-3" alt="">
+        PV@FHNW</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            {% for nav_item in nav.top %}
+            {% if nav_item.items %}
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle {{ 'active' if nav_item.is_active else '' }}"
+                   href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+                   aria-expanded="false">
+                    {{ nav_item.label }}{% if nav_item.is_active %}
+                    <span class="sr-only">(current)</span>{% endif %}
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    {% for nav_sub_item in nav_item.items %}
+                    <li class="dropdown-item {{ 'active' if nav_sub_item.is_active else '' }}">
+                        <a class="nav-link{{ ' active' if nav_sub_item.is_active else '' }}"
+                           href="{{ nav_sub_item.url }}">
+                            {{ nav_sub_item.label }}{% if nav_sub_item.is_current %}
+                            <span class="sr-only">(current)</span>{% endif %}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </li>
+            {% else %}
+            <li class="nav-item">
+                <a class="nav-link{{ ' active' if nav_item.is_active else '' }}"
+                   href="{{ nav_item.url }}">
+                    {{ nav_item.label }}{% if nav_item.is_current %}
+                    <span class="sr-only">(current)</span>{% endif %}
+                </a>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+
+</nav>

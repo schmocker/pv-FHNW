@@ -1,0 +1,9 @@
+flask
+flask_sqlalchemy
+Flask-Navigation
+
+numpy
+pandas
+scipy
+xlrd
+python-dotenv

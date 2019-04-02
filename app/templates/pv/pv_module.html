@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1>PV-Modul: {{ module.model }}</h1>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Bezeichnung</th>
+        <th scope="col">Datenursprung</th>
+        <th scope="col">Wert</th>
+        <th scope="col">Einheit</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for col in module.__class__.__table__.columns %}
+    <tr>
+        <th scope="row">{{ col.info['label'] }}</th>
+        <td>{{ col.info['origin'] }}</td>
+        <td class="text-right">{{ module|attr(col.key) }}</td>
+        <td>{{ col.info['unit'] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -2,5 +2,36 @@
 
 {% block content %}
 <h1>PV-Module</h1>
-Content
+<table class="table table-bordered  table-hover">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Model</th>
+        <th scope="col">Hersteller</th>
+        <th scope="col">Type</th>
+        <th scope="col">Infos</th>
+        <th scope="col">Preis [CHF]</th>
+        <th scope="col">Länge [m]</th>
+        <th scope="col">Breite [m]</th>
+        <th scope="col">Shunt Widerstand [Ohm]</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for module in modules %}
+    {% set url = url_for('pv.pv_module', id=module.id) %}
+    <tr onclick="window.location.href = '{{ url }}';" style="cursor: pointer">
+        <th scope="row">{{ module.id }}</th>
+        <td>{{ module.model }}</td>
+        <td>{{ module.manufacturer }}</td>
+        <td>{{ module.cell_type }}</td>
+        <td>{{ module.additional_information }}</td>
+        <td>{{ module.price_CHF }}</td>
+        <td>{{ module.length }}</td>
+        <td>{{ module.width }}</td>
+        <td>{{ module.shunt_resistance_Ohm }}</td>
+    </tr>
+
+    {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

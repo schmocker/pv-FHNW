@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, abort, request, redirect, flash
 import numpy as np
 import json
 
-from ..database import PvModule
+from ..db import PvModule
 
 pv_modules_routes = Blueprint('pv', __name__, template_folder='templates')
 

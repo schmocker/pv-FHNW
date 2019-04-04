@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, flash
-
 main_routes = Blueprint('main', __name__, template_folder='templates')
 
 

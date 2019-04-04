@@ -37,6 +37,7 @@ class Base:
             unit = unit.replace('%', 'pct')
             unit = unit.replace('°C', 'degC')
             unit = unit.replace('-', '1')
+            unit = unit.replace('Ohm', 'ohm')
             return ureg.Unit(unit)
         except KeyError as e:
             if not hasattr(cls, col_name):
@@ -80,7 +81,7 @@ class Measurement(db.Model, Base):
     date = db.Column(db.Date, nullable=False, info={'label': 'Datum', 'format': 'YY-MM-DD'})
     measurement_series = db.Column(db.String(80), nullable=False, info={'label': 'Messreihe'})
     weather = db.Column(db.String(80), nullable=False, info={'label': 'Wetter'})
-    producer = db.Column(db.String(80), nullable=False, info={'label': 'Erasser'})
+    producer = db.Column(db.String(80), nullable=False, info={'label': 'Erfasser'})
 
     _U_module = db.Column('U_module[V]', db.Float, nullable=False,
                           info={'label': 'Spannung des Modules', 'unit': 'V'})
@@ -158,7 +159,7 @@ class Measurement(db.Model, Base):
 
     @property
     def I_module(self):
-        return self.U_module / self.pv_module.shunt_resistance
+        return (self.U_shunt / self.pv_module.R_shunt).to(ureg.A)
 
     @property
     def U_module_stc(self):
@@ -204,6 +205,10 @@ class PvModule(db.Model, Base):
     length = db.Column(db.Float, info={'label': 'Länge', 'unit': 'm'})
     width = db.Column(db.Float, info={'label': 'Breite', 'unit': 'm'})
     shunt_resistance = db.Column(db.Float, info={'label': 'Shunt-Widerstand', 'unit': 'Ohm'})
+
+    @property
+    def R_shunt(self):
+        return self.get_value_with_unit('shunt_resistance')
 
     # manufacturer data
     _U_mpp_m = db.Column('U_mpp_manufacturer[V]', db.Float,

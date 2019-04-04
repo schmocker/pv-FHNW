@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+    <h1>Data</h1>
+
+    <canvas id="myChart" class="m-3"></canvas>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Module</th>
+            <th scope="col">Date</th>
+            <th scope="col">Messreihe</th>
+            <th scope="col">Wetter</th>
+            <th scope="col">Modulspannung [V]</th>
+            <th scope="col">Modulstrom [A]</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for d in data %}
+            <tr>
+                <th scope="row">{{ d.id }}</th>
+                <td>{{ d.pv_module }}</td>
+                <td>{{ d.date.strftime('%d.%m.%Y') }}</td>
+                <td>{{ d.measurement_series }}</td>
+                <td>{{ d.weather }}</td>
+                <td class="text-right">{{ d.U_module }}</td>
+                <td class="text-right">{{ d.I_module }}</td>
+            </tr>
+
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+    <script>
+        let chart_data = {{ chart_data | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='scripts/chart.js') }}"></script>
+
+{% endblock %}

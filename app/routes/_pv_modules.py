@@ -10,6 +10,7 @@ pv_modules_routes = Blueprint('pv', __name__, template_folder='templates')
 @pv_modules_routes.route('/pv_modules')
 def pv_modules():
     modules = PvModule.query.all()
+    print(modules[0].ff_f)
     return render_template('pv/pv_modules.html', modules=modules)
 
 

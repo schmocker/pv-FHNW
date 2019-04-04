@@ -14,13 +14,16 @@
     </tr>
     </thead>
     <tbody>
-    {% for col in module.__class__.__table__.columns %}
+    {% set cls = module.__class__ %}
+    {% for col_name in cls.get_column_names() %}
+    {% set col = cls|attr(col_name) %}
+    {% if col.info['label'] %}
     <tr>
         <th scope="row">{{ col.info['label'] }}</th>
         <td>{{ col.info['origin'] }}</td>
-        <td class="text-right">{{ module|attr(col.key) }}</td>
+        <td class="text-right">{{ module.get_value(col_name) }}</td>
         <td>{{ col.info['unit'] }}</td>
-    </tr>
+    </tr>{% endif %}
     {% endfor %}
     </tbody>
 </table>

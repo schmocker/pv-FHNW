@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_navigation import Navigation
 from app._config import Config
-from app.db import db
+from app.db import db, PvModule
 from .routes import main_routes, pv_modules_routes, page_not_found, internal_server_error
 
 

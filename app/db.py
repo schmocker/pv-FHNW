@@ -4,6 +4,9 @@ import pint
 from pint.converters import ScaleConverter
 from pint.unit import UnitDefinition
 import sqlalchemy
+import pandas as pd
+import xlsxwriter
+from io import BytesIO
 
 db = SQLAlchemy()
 
@@ -79,17 +82,51 @@ class Measurement(db.Model, Base):
     weather = db.Column(db.String(80), nullable=False, info={'label': 'Wetter'})
     producer = db.Column(db.String(80), nullable=False, info={'label': 'Erasser'})
 
-    _U_module = db.Column(db.Float, nullable=False, info={'label': 'Spannung des Modules', 'unit': 'V'})
-    _U_shunt = db.Column(db.Float, nullable=False, info={'label': 'Spannung über Shunt-Widerstand', 'unit': 'V'})
-    _U_T_amb = db.Column(db.Float, nullable=False,
+    _U_module = db.Column('U_module[V]', db.Float, nullable=False,
+                          info={'label': 'Spannung des Modules', 'unit': 'V'})
+    _U_shunt = db.Column('U_shunt[V]', db.Float, nullable=False,
+                         info={'label': 'Spannung über Shunt-Widerstand', 'unit': 'V'})
+    _U_T_amb = db.Column('U_T_amb[V]', db.Float, nullable=False,
                          info={'label': 'Spannung des Temperatursensors für die Umgebungstemperatur', 'unit': 'V'})
-    _U_T_pan = db.Column(db.Float, nullable=False,
+    _U_T_pan = db.Column('U_T_pan[V]', db.Float, nullable=False,
                          info={'label': 'Spannung des Temperatursensors für die Modultemperatur', 'unit': 'V'})
-    _U_G_hor = db.Column(db.Float, nullable=False,
+    _U_G_hor = db.Column('U_G_hor[V]', db.Float, nullable=False,
                          info={'label': 'Spannung des Pyranometers für die horizontale Strahlung', 'unit': 'V'})
-    _U_G_pan = db.Column(db.Float, nullable=False,
+    _U_G_pan = db.Column('U_G_pan[V]', db.Float, nullable=False,
                          info={'label': 'Spannung des Pyranometers für die Strahlung mit Modulneigung', 'unit': 'V'})
-    _U_G_ref = db.Column(db.Float, nullable=False, info={'label': 'Spannung des Referenzzelle', 'unit': 'V'})
+    _U_G_ref = db.Column('U_G_ref[V]', db.Float, nullable=False,
+                         info={'label': 'Spannung des Referenzzelle', 'unit': 'V'})
+
+    @classmethod
+    def get_xlsx_template(cls):
+        columns = [cls._U_module, cls._U_shunt, cls._U_T_amb, cls._U_T_pan, cls._U_G_hor, cls._U_G_pan, cls._U_G_ref]
+
+        output = BytesIO()
+        book = xlsxwriter.Workbook(output)
+        bold = book.add_format({'bold': True})
+
+        sheet_data = book.add_worksheet('data')
+        for i, cn in enumerate(columns):
+            sheet_data.write(0, i, cn.name, bold)
+            for j in range(10):
+                sheet_data.write(j+1, i, 0)
+            sheet_data.set_column(i, i, 15)
+
+        sheet_info = book.add_worksheet('info')
+        sheet_info.write(0, 0, 'Spalte', bold)
+        sheet_info.write(0, 1, 'Beschreibung', bold)
+        sheet_info.write(0, 2, 'Einheit', bold)
+        for i, cn in enumerate(columns):
+            sheet_info.write(i+1, 0, cn.name)
+            sheet_info.write(i+1, 1, cn.info['label'])
+            sheet_info.write(i+1, 2, cn.info['unit'])
+        sheet_info.set_column(0, 0, 15)
+        sheet_info.set_column(1, 1, 60)
+        sheet_info.set_column(2, 2, 8)
+
+        book.close()
+        output.seek(0)
+        return output
 
     @property
     def U_module(self):
@@ -179,9 +216,9 @@ class PvModule(db.Model, Base):
                         info={'label': 'Kurzschlussstrom', 'unit': 'A', 'origin': 'Hersteller'})
     _ff_m = db.Column('form_factor_manufacturer[-]', db.Float,
                       info={'label': 'Form-Faktor', 'unit': '-', 'origin': 'Hersteller'})
-    _a_U_oc = db.Column('voltage_temperature_coef_oc_manufacturer[%/°C]', db.Float,
+    _a_U_oc = db.Column('voltage_temperature_coef_oc_manufacturer[%/K]', db.Float,
                         info={'label': 'Spannungs-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
-    _a_I_sc = db.Column('current_temperature_coef_sc_manufacturer[%/°C]', db.Float,
+    _a_I_sc = db.Column('current_temperature_coef_sc_manufacturer[%/K]', db.Float,
                         info={'label': 'Strom-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
 
     @property
@@ -218,15 +255,15 @@ class PvModule(db.Model, Base):
     _T_module_f = db.Column('module_temperature_flasher[°C]', db.Float,
                             info={'label': 'Modul-Temperatur', 'unit': '°C', 'origin': 'Flasher-Messung'})
     _U_mpp_f = db.Column('U_mpp_flasher[V]', db.Float,
-                        info={'label': 'Spannung bei MPP', 'unit': 'V', 'origin': 'Flasher-Messung'})
+                         info={'label': 'Spannung bei MPP', 'unit': 'V', 'origin': 'Flasher-Messung'})
     _I_mpp_f = db.Column('I_mpp_flasher[A]', db.Float,
-                        info={'label': 'Strom bei MPP', 'unit': 'A', 'origin': 'Flasher-Messung'})
+                         info={'label': 'Strom bei MPP', 'unit': 'A', 'origin': 'Flasher-Messung'})
     _U_oc_f = db.Column('U_oc_flasher[V]', db.Float,
-                       info={'label': 'Leerlaufspannung', 'unit': 'V', 'origin': 'Flasher-Messung'})
+                        info={'label': 'Leerlaufspannung', 'unit': 'V', 'origin': 'Flasher-Messung'})
     _I_sc_f = db.Column('I_sc_flasher[A]', db.Float,
-                       info={'label': 'Kurzschlussstrom', 'unit': 'A', 'origin': 'Flasher-Messung'})
+                        info={'label': 'Kurzschlussstrom', 'unit': 'A', 'origin': 'Flasher-Messung'})
     _ff_f = db.Column('form_factor_flasher[-]', db.Float,
-                     info={'label': 'Form-Faktor', 'unit': '-', 'origin': 'Flasher-Messung'})
+                      info={'label': 'Form-Faktor', 'unit': '-', 'origin': 'Flasher-Messung'})
 
     @property
     def G_f(self):
@@ -262,12 +299,3 @@ class PvModule(db.Model, Base):
     @classmethod
     def import_dataframe(cls, df):
         pass
-
-    @classmethod
-    def get_xlsx_template(cls):
-        pass
-
-
-PvModule.get_xlsx_template()
-
-

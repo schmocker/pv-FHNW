@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block content %}
+
 <h1>PV-Modul: {{ module.model }}</h1>
 
 <table class="table">
@@ -23,4 +24,6 @@
     {% endfor %}
     </tbody>
 </table>
+
+<a href="{{ url_for('pv.pv_modules') }}" class="btn btn-primary">Alle PV-Module anzeigen</a>
 {% endblock %}

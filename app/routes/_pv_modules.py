@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, abort, request, redirect, flash
+from flask import Blueprint, render_template, abort, request, redirect, flash, send_file
 import numpy as np
 import json
 
-from ..db import PvModule
+from ..db import PvModule, Measurement
 
 pv_modules_routes = Blueprint('pv', __name__, template_folder='templates')
 
@@ -12,6 +12,12 @@ def pv_modules():
     modules = PvModule.query.all()
     print(modules[0].ff_f)
     return render_template('pv/pv_modules.html', modules=modules)
+
+
+@pv_modules_routes.route('/template')
+def template():
+    data = Measurement.get_xlsx_template()
+    return send_file(data, attachment_filename="template.xlsx", as_attachment=True)
 
 
 @pv_modules_routes.route('/pv_module')

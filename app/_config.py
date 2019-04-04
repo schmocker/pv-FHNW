@@ -8,6 +8,7 @@ load_dotenv()
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 print(ROOT_DIR)
 
+
 class Config:
     LOGGING_LEVEL = int(environ.get('LOGGING_LEVEL', default=5))
     LOGGING_FORMATTER = environ.get('LOGGING_FORMATTER', default='%(levelname)s::%(module)s: %(message)s')

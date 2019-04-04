@@ -31,6 +31,7 @@ def create_app(test_config=None, database_conn=None):
         nav.Item('Home', 'main.home'),
         nav.Item('PV-Modules', 'pv.pv_modules'),
         nav.Item('Template', 'pv.template'),
+        nav.Item('Upload', 'main.upload_file'),
         nav.Item('Home', 'main.home', items=[
             nav.Item('Home', 'main.home'),
             nav.Item('Home', 'main.home'),

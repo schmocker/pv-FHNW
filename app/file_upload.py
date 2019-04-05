@@ -7,6 +7,13 @@ from .routes._main import main_routes
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'app/files')
 ALLOWED_EXTENSIONS = set(['csv', 'xls', 'xlsx'])
 
+from wtforms import Form, BooleanField, StringField, PasswordField, validators, DateField, SelectField
+
+class RegistrationForm(Form):
+    date = DateField('Username')
+    language = SelectField('PV-Modul', choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')])
+
+    confirm = PasswordField('Upload')
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

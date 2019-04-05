@@ -4,6 +4,7 @@ from flask_navigation import Navigation
 from app._config import Config
 from app.db import db, PvModule
 from .routes import main_routes, pv_modules_routes, page_not_found, internal_server_error, data_routes
+from .file_upload import upload_file
 
 
 def create_app(test_config=None, database_conn=None):
@@ -26,6 +27,7 @@ def create_app(test_config=None, database_conn=None):
         nav.Item('Home', 'main.home'),
         nav.Item('PV-Modules', 'pv.pv_modules'),
         nav.Item('Data', 'data.data'),
+        nav.Item('Upload', 'main.upload_file'),
         nav.Item('Home', 'main.home', items=[
             nav.Item('Home', 'main.home'),
             nav.Item('Home', 'main.home'),

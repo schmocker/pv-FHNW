@@ -300,7 +300,3 @@ class PvModule(db.Model, Base):
 
     def __repr__(self):
         return f'PV-Modul ({self.model})'
-
-    @classmethod
-    def import_dataframe(cls, df):
-        pass

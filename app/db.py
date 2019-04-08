@@ -26,8 +26,6 @@ class Base:
             return getattr(self, col_name)
         except AttributeError as e:
             raise AttributeError(f'database table class "{self.__class__}" has no column attribute "{col_name}"')
-        except Exception as e:
-            raise e
 
     @classmethod
     def get_column_unit(cls, col_name: str):

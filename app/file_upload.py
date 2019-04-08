@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from .routes._main import main_routes
 from wtforms import Form, BooleanField, StringField, PasswordField, validators, DateField, SelectField
 from .db import db, Measurement, PvModule
+import configparser
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'app/files')
 ALLOWED_EXTENSIONS = set(['csv', 'xls', 'xlsx'])
@@ -39,7 +40,7 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(UPLOAD_FOLDER, filename))
             flash('file chosen')
-            process_file('measurement', filename)
+            process_file('MEASUREMENT', filename)
             # return redirect(url_for('uploaded_file',
             #                         filename=filename))
     return render_template('main/upload.html')
@@ -49,20 +50,60 @@ def process_file(file_type='pvmodule', filename=''):
     """open the file containing data and return table as pandas dataframe"""
     path_to_file = os.path.join(UPLOAD_FOLDER, filename)
     with open(path_to_file) as f:
-        dataframe = pd.read_csv(f)
+        dataframe = pd.read_csv(f, sep=';')
         commit_dataframe_to_database(dataframe, file_type)
     os.remove(path_to_file)
 
 
-def commit_dataframe_to_database(df, type_of_data):
+def get_columns_of_table(type_of_data):
+    config = configparser.ConfigParser()
+    # preserve case
+    config.optionxform = lambda option: option
+
+    filepath = os.path.join(os.getcwd(), 'app/config.ini')
+    try:
+        config.read(filepath)
+    except FileNotFoundError:
+        return
+    print(config.sections())
+    columns = [option for option in config[type_of_data]]
+    print("new columns: ",columns)
+    return columns
+
+
+def convert_df_columns_to_desired_type(type_of_data, df):
+    config = configparser.ConfigParser()
+    # preserve case
+    config.optionxform = lambda option: option
+
+    filepath = os.path.join(os.getcwd(), 'app/config.ini')
+    try:
+        config.read(filepath)
+    except FileNotFoundError:
+        return
+    for column in df:
+        df[column] = df[column].astype(config[type_of_data][column])
+
+
+def commit_dataframe_to_database(df, type_of_data="MEASUREMENT"):
     """take data frame and write it as dictionary and insert into sql alchemy"""
-    dictionary_for_insertion = df.to_dict(orient='list')
-    if type_of_data is 'measurement':
+    print("current columns: ", df.columns)
+    df.columns = get_columns_of_table(type_of_data)
+    convert_df_columns_to_desired_type(type_of_data, df)
+
+    # format: dict like {index -> {column -> value}}
+    dictionary_for_insertion = df.to_dict(orient='index')
+    print(dictionary_for_insertion)
+    if type_of_data is 'MEASUREMENT':
         # "**" star operator take dictionary for values in ORM model
-        new_data = Measurement(**dictionary_for_insertion)
-    elif type_of_data is 'pvmodule':
-        new_data = PvModule(**dictionary_for_insertion)
+        for key in dictionary_for_insertion:
+            print(dictionary_for_insertion[key])
+            new_data = Measurement(**(dictionary_for_insertion[key]))
+            db.session.add(new_data)
+    elif type_of_data is 'PVMODULE':
+        for key in dictionary_for_insertion:
+            new_data = PvModule(**(dictionary_for_insertion[key]))
+            db.session.add(new_data)
     else:
         raise ValueError("dataframe from excel was neither labeled measurement or pv_module")
-    db.session.add(new_data)
 

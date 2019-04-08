@@ -75,10 +75,11 @@ class Measurement(db.Model, Base):
 
     id = db.Column(db.Integer, primary_key=True, info={'label': '#'})
     fk_pv_module = db.Column(db.Integer, db.ForeignKey('PvModule.id'), nullable=False)
-    pv_module = db.relationship('PvModule',
-                                backref=db.backref('measurements', lazy=True))
+    # pv_module = db.relationship('PvModule',
+    #                             backref=db.backref('measurements', lazy=True))
+    pv_module = db.Column(db.String(80), nullable=False, info={'label': 'PvModul'})
 
-    date = db.Column(db.Date, nullable=False, info={'label': 'Datum', 'format': 'YY-MM-DD'})
+    date = db.Column(db.String, nullable=False, info={'label': 'Datum', 'format': 'YY-MM-DD'})
     measurement_series = db.Column(db.String(80), nullable=False, info={'label': 'Messreihe'})
     weather = db.Column(db.String(80), nullable=False, info={'label': 'Wetter'})
     producer = db.Column(db.String(80), nullable=False, info={'label': 'Erfasser'})

@@ -1,21 +1,22 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_navigation import Navigation
-from pvtool._config import Config
+from pvtool._config import Config, TestingConfig
 from pvtool.db import db, PvModule
 from .routes import main_routes, pv_modules_routes, page_not_found, internal_server_error, data_routes
 from .file_upload import upload_file
 
 
-def create_app(test_config=None, database_conn=None):
+def create_app(test_config=None):
     config = Config()
     # create pvtool
-    app = Flask(__name__)
-    if test_config is None:
-        app.config.from_object(config)
-    else:
-        app.config.from_mapping(test_config)
+    app = Flask('pvtool')
 
+    # TODO: Update this if other configs are needed
+    if test_config is not None:
+        config = TestingConfig()
+
+    app.config.from_object(config)
     # database
     db.init_app(app)
     # create db

@@ -16,9 +16,6 @@ def app():
         'DATABASE': db_path
     })
 
-    with app.app_context():
-        app.init_db()
-
     yield app
 
     os.close(db_fd)

@@ -9,7 +9,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 print(ROOT_DIR)
 
 
-class Config:
+class Config(object):
     LOGGING_LEVEL = int(environ.get('LOGGING_LEVEL', default=5))
     LOGGING_FORMATTER = environ.get('LOGGING_FORMATTER', default='%(levelname)s::%(module)s: %(message)s')
     SECRET_KEY = environ.get('SECRET_KEY', default='8"79cpvp?xyCBPZV]T8~-m3"*0x>dm88Nm$PV]sW}AMq/Fj4zBa%fGt~Xa>emVw')
@@ -19,3 +19,10 @@ class Config:
     # DATABASE
     DB_NAME = environ.get('DB_NAME', default="database")
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(ROOT_DIR,"temp",DB_NAME)}.db'
+
+
+class TestingConfig(Config):
+    TESTING = True
+    # DATABASE
+    DB_NAME = "test"
+    SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(ROOT_DIR,"temp","test")}.db'

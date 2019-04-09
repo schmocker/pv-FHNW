@@ -3,11 +3,10 @@ import tempfile
 
 import pytest
 
-from app import create_app
-
+from pvtool import create_app
 
 @pytest.fixture
-def client():
+def app():
     """skeleton for testing that is coming
     db_fd: file handle for temporary database"""
     db_fd, db_path = tempfile.mkstemp()

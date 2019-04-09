@@ -7,7 +7,7 @@ from wtforms import Form, BooleanField, StringField, PasswordField, validators, 
 from .db import db, Measurement, PvModule
 import configparser
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'app/files')
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'pvtool/files')
 ALLOWED_EXTENSIONS = set(['csv', 'xls', 'xlsx'])
 
 
@@ -60,7 +60,7 @@ def get_columns_of_table(type_of_data):
     # preserve case
     config.optionxform = lambda option: option
 
-    filepath = os.path.join(os.getcwd(), 'app/config.ini')
+    filepath = os.path.join(os.getcwd(), 'pvtool/config.ini')
     try:
         config.read(filepath)
     except FileNotFoundError:
@@ -76,7 +76,7 @@ def convert_df_columns_to_desired_type(type_of_data, df):
     # preserve case
     config.optionxform = lambda option: option
 
-    filepath = os.path.join(os.getcwd(), 'app/config.ini')
+    filepath = os.path.join(os.getcwd(), 'pvtool/config.ini')
     try:
         config.read(filepath)
     except FileNotFoundError:

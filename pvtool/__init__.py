@@ -1,18 +1,20 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_navigation import Navigation
-from app._config import Config
-from app.db import db, PvModule
+from pvtool._config import Config
+from pvtool.db import db, PvModule
 from .routes import main_routes, pv_modules_routes, page_not_found, internal_server_error, data_routes
 from .file_upload import upload_file
 
 
 def create_app(test_config=None, database_conn=None):
     config = Config()
-
-    # create app
+    # create pvtool
     app = Flask(__name__)
-    app.config.from_object(config)
+    if test_config is None:
+        app.config.from_object(config)
+    else:
+        app.config.from_mapping(test_config)
 
     # database
     db.init_app(app)
@@ -43,4 +45,3 @@ def create_app(test_config=None, database_conn=None):
     app.register_error_handler(500, internal_server_error)
 
     return app
-

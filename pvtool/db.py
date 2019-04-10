@@ -220,10 +220,10 @@ class PvModule(db.Model, Base):
                         info={'label': 'Kurzschlussstrom', 'unit': 'A', 'origin': 'Hersteller'})
     _ff_m = db.Column('form_factor_manufacturer[-]', db.Float,
                       info={'label': 'Form-Faktor', 'unit': '-', 'origin': 'Hersteller'})
-    _a_U_oc = db.Column('voltage_temperature_coef_oc_manufacturer[%/K]', db.Float,
-                        info={'label': 'Spannungs-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
-    _a_I_sc = db.Column('current_temperature_coef_sc_manufacturer[%/K]', db.Float,
-                        info={'label': 'Strom-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
+    # _a_U_oc = db.Column('voltage_temperature_coef_oc_manufacturer[%/K]', db.Float,
+    #                     info={'label': 'Spannungs-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
+    # _a_I_sc = db.Column('current_temperature_coef_sc_manufacturer[%/K]', db.Float,
+    #                     info={'label': 'Strom-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
 
     @property
     def U_mpp_m(self):

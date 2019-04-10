@@ -17,6 +17,7 @@ def create_app(test_config=None):
         config = TestingConfig()
 
     app.config.from_object(config)
+    print(app.config)
     # database
     db.init_app(app)
     # create db

@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, abort, request, redirect, flash
 
 from ..db import PvModule
 
+from ..file_upload import PvModuleForm
+
 pv_modules_routes = Blueprint('pv', __name__, template_folder='templates')
 
 
@@ -27,10 +29,10 @@ def pv_module():
         return redirect('pv_modules')
 
 
-@pv_modules_routes.route('/pv_modules/add')
+@pv_modules_routes.route('/pv_modules/add', methods=['GET', 'POST'])
 def add_pv_module():
-    pass
-    # todo: add-form
+    form = PvModuleForm()
+    return render_template('pv/add_pv_module.html', form=form)
 
 
 @pv_modules_routes.route('/pv_modules/edit')

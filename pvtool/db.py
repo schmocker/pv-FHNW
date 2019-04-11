@@ -97,6 +97,7 @@ class Measurement(db.Model, Base):
     _U_G_ref = db.Column('U_G_ref[V]', db.Float, nullable=False,
                          info={'label': 'Spannung des Referenzzelle', 'unit': 'V'})
 
+
     @classmethod
     def get_xlsx_template(cls):
         columns = [cls._U_module, cls._U_shunt, cls._U_T_amb, cls._U_T_pan, cls._U_G_hor, cls._U_G_pan, cls._U_G_ref]

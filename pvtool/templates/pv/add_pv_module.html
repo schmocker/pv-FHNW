@@ -6,13 +6,42 @@
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>
-            {{ form.username.label }}<br>
-            {{ form.username(size=32) }}
+            {{ form.modellnummer.label }}<br>
+            {{ form.modellnummer(size=32) }}
+        </p>
+        <p>
+            {{ form.hersteller.label }}<br>
+            {{ form.hersteller(size=32) }}
+        </p>
+        <p>
+            {{ form.hersteller.label }}<br>
+            {{ form.hersteller(size=32) }}
+        </p>
+        <p>
+            {{ form.zelltyp.label }}<br>
+            {{ form.zelltyp(size=32) }}
+        </p>
+        <p>
+            {{ form.bemerkung.label }}<br>
+            {{ form.bemerkung(size=32) }}
+        </p>
+        <p>
+            {{ form.laenge.label }}<br>
+            {{ form.laenge(size=32) }}
+        </p>
+        <p>
+            {{ form.breite.label }}<br>
+            {{ form.breite(size=32) }}
+        </p>
+        <p>
+            {{ form.widerstand.label }}<br>
+            {{ form.widerstand(size=32) }}
         </p>
         <p>
             {{ form.accept_rules() }} {{ form.accept_rules.label }}
         </p>
         <p> {{ form.submit() }}</p>
     </form>
+    <a href="{{ url_for('pv.pv_modules') }}" class="btn btn-primary">Alle PV-Module anzeigen</a>
 
 {% endblock %}

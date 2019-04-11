@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, abort, request, redirect, flash
 
-from ..db import PvModule
+from ..db import PvModule, db
 
-from ..file_upload import PvModuleForm
+from ..forms import PvModuleForm
+
+from sqlalchemy.orm import sessionmaker
 
 pv_modules_routes = Blueprint('pv', __name__, template_folder='templates')
 
@@ -17,12 +19,12 @@ def pv_modules():
 @pv_modules_routes.route('/pv_module')
 def pv_module():
     try:
-        id = request.args.get('id', type=int)
-        if id is None:
+        pv_id = request.args.get('id', type=int)
+        if pv_id is None:
             raise Exception(f'no valid id for pv module')
-        module = PvModule.query.get(id)
+        module = PvModule.query.get(pv_id)
         if module is None:
-            raise Exception(f'no pv module with id {id} exists')
+            raise Exception(f'no pv module with id {pv_id} exists')
         return render_template('pv/pv_module.html', module=module)
     except Exception as e:
         flash(str(e), category='danger')
@@ -32,6 +34,20 @@ def pv_module():
 @pv_modules_routes.route('/pv_modules/add', methods=['GET', 'POST'])
 def add_pv_module():
     form = PvModuleForm()
+    if request.method == 'POST':
+        new_pv_module = PvModule(model=form.modellnummer.data,
+                                 manufacturer=form.hersteller.data,
+                                 cell_type=form.zelltyp.data,
+                                 additional_information=form.bemerkung.data,
+                                 price_CHF=form.neupreis.data,
+                                 length=form.laenge.data,
+                                 width=form.breite.data,
+                                 shunt_resistance=form.widerstand.data,
+                                 )
+        db.session.add(new_pv_module)
+        db.session.commit()
+        print("The awesome module: ", new_pv_module)
+
     return render_template('pv/add_pv_module.html', form=form)
 
 

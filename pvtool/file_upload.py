@@ -3,34 +3,11 @@ import pandas as pd
 from flask import Flask, flash, request, redirect, url_for, send_from_directory, render_template
 from werkzeug.utils import secure_filename
 from .routes._main import main_routes
-from flask_wtf import FlaskForm
-from wtforms import Form, BooleanField, StringField, PasswordField, validators, DateField, SelectField, SubmitField, FloatField
 from .db import db, Measurement, PvModule
 import configparser
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'pvtool/files')
 ALLOWED_EXTENSIONS = set(['csv', 'xls', 'xlsx'])
-
-
-class RegistrationForm(FlaskForm):
-    username = StringField('Username', [validators.length(min=3, max=25)])
-    accept_rules = BooleanField('I accept the site rules', [validators.InputRequired()])
-    submit = SubmitField('PV-Modul hinzufügen')
-
-
-class PvModuleForm(RegistrationForm):
-    hersteller = StringField('Modellnummer', [validators.length(min=5, max=40)])
-    hersteller = StringField('Hersteller', [validators.length(min=5, max=40)])
-    hersteller = StringField('Zelltype', [validators.length(min=5, max=40)])
-    hersteller = StringField('Bemerkung', [validators.length(min=5, max=40)])
-    hersteller = StringField('Neupreis[CHF]', [validators.length(min=5, max=40)])
-    hersteller = StringField('Länge[m]', [validators.length(min=5, max=40)])
-    hersteller = StringField('Breite[m]', [validators.length(min=5, max=40)])
-
-
-
-class MeasurementForm(RegistrationForm):
-    measurement_date = DateField('Measurement Date')
 
 
 def allowed_file(filename):

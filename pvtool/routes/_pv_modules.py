@@ -12,7 +12,7 @@ pv_modules_routes = Blueprint('pv', __name__, template_folder='templates')
 @pv_modules_routes.route('/pv_modules')
 def pv_modules():
     modules = PvModule.query.all()
-    print(modules[0].ff_f)
+    # print(modules[0].ff_f)
     return render_template('pv/pv_modules.html', modules=modules)
 
 
@@ -51,13 +51,25 @@ def add_pv_module():
     return render_template('pv/add_pv_module.html', form=form)
 
 
-@pv_modules_routes.route('/pv_modules/edit')
+@pv_modules_routes.route('/pv_modules/edit', methods=['GET', 'POST'])
 def edit_pv_module():
-    id = request.args.get('id', type=int)
-    # todo: edit-form (evt. combine edit and add form if possible)
+    pv_id = request.args.get('id', type=int)
+    form = PvModuleForm()
+    if request.method == 'POST':
+        module_entry = PvModule.query.filter(PvModule.id == pv_id).first()
+        print("module entry", module_entry)
+        form = form.process(request.method, module_entry)
+
+    return render_template('pv/add_pv_module.html', form=form)
 
 
 @pv_modules_routes.route('/pv_modules/remove')
 def remove_pv_module():
-    id = request.args.get('id', type=int)
-    # todo: remove request
+    pv_id = request.args.get('id', type=int)
+
+    if pv_id is not None:
+        db.session.query(PvModule).filter(PvModule.id == pv_id).delete()
+        db.session.commit()
+
+    return redirect('/pv_modules')
+

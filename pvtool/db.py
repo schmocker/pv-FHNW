@@ -69,18 +69,25 @@ class Base:
 
 
 class Measurement(db.Model, Base):
-    __tablename__ = __qualname__
+    __tablename__ = 'measurement'
 
     id = db.Column(db.Integer, primary_key=True, info={'label': '#'})
-    fk_pv_module = db.Column(db.Integer, db.ForeignKey('PvModule.id'), nullable=False)
-    # pv_module = db.relationship('PvModule',
-    #                             backref=db.backref('measurements', lazy=True))
-    pv_module = db.Column(db.String(80), nullable=False, info={'label': 'PvModul'})
 
     date = db.Column(db.String, nullable=False, info={'label': 'Datum', 'format': 'YY-MM-DD'})
     measurement_series = db.Column(db.String(80), nullable=False, info={'label': 'Messreihe'})
     weather = db.Column(db.String(80), nullable=False, info={'label': 'Wetter'})
     producer = db.Column(db.String(80), nullable=False, info={'label': 'Erfasser'})
+
+    pv_module_id = db.Column(db.Integer, db.ForeignKey('pv_module.id'))
+    pv_module = db.relationship('PvModule', back_populates='measurement')
+
+    measurement_values = db.relationship('MeasurementValues')
+
+
+class MeasurementValues(db.Model, Base):
+    __tablename__ = 'measurement_values'
+
+    id = db.Column(db.Integer, primary_key=True)
 
     _U_module = db.Column('U_module[V]', db.Float, nullable=False,
                           info={'label': 'Spannung des Modules', 'unit': 'V'})
@@ -97,6 +104,8 @@ class Measurement(db.Model, Base):
     _U_G_ref = db.Column('U_G_ref[V]', db.Float, nullable=False,
                          info={'label': 'Spannung des Referenzzelle', 'unit': 'V'})
 
+    measurement_id = db.Column(db.Integer, db.ForeignKey('measurement.id'))
+    measurement = db.relationship('Measurement', back_populates='measurement_values')
 
     @classmethod
     def get_xlsx_template(cls):
@@ -110,7 +119,7 @@ class Measurement(db.Model, Base):
         for i, cn in enumerate(columns):
             sheet_data.write(0, i, cn.name, bold)
             for j in range(10):
-                sheet_data.write(j+1, i, 0)
+                sheet_data.write(j + 1, i, 0)
             sheet_data.set_column(i, i, 15)
 
         sheet_info = book.add_worksheet('info')
@@ -118,9 +127,9 @@ class Measurement(db.Model, Base):
         sheet_info.write(0, 1, 'Beschreibung', bold)
         sheet_info.write(0, 2, 'Einheit', bold)
         for i, cn in enumerate(columns):
-            sheet_info.write(i+1, 0, cn.name)
-            sheet_info.write(i+1, 1, cn.info['label'])
-            sheet_info.write(i+1, 2, cn.info['unit'])
+            sheet_info.write(i + 1, 0, cn.name)
+            sheet_info.write(i + 1, 1, cn.info['label'])
+            sheet_info.write(i + 1, 2, cn.info['unit'])
         sheet_info.set_column(0, 0, 15)
         sheet_info.set_column(1, 1, 60)
         sheet_info.set_column(2, 2, 8)
@@ -193,7 +202,7 @@ class Measurement(db.Model, Base):
 
 
 class PvModule(db.Model, Base):
-    __tablename__ = __qualname__
+    __tablename__ = 'pv_module'
 
     id = db.Column(db.Integer, primary_key=True, info={'label': '#'})
 
@@ -206,11 +215,25 @@ class PvModule(db.Model, Base):
     width = db.Column(db.Float, info={'label': 'Breite', 'unit': 'm'})
     shunt_resistance = db.Column(db.Float, info={'label': 'Shunt-Widerstand', 'unit': 'Ohm'})
 
+    manufacturer_data = db.relationship('ManufacturerData', uselist=False, back_populates='pv_module')
+    flasher_data = db.relationship('FlasherData', uselist=False, back_populates='pv_module')
+
+    measurement = db.relationship('Measurement')
+
     @property
     def R_shunt(self):
         return self.get_value_with_unit('shunt_resistance')
 
+    # def __repr__(self):
+    #     return "<Modell:'%s':'%s'> " % self.manufacturer, self.model
+
+
+class ManufacturerData(db.Model, Base):
+    __tablename__ = 'manufacturer_data'
+
     # manufacturer data
+    id = db.Column(db.Integer, primary_key=True)
+
     _U_mpp_m = db.Column('U_mpp_manufacturer[V]', db.Float,
                          info={'label': 'Spannung bei MPP', 'unit': 'V', 'origin': 'Hersteller'})
     _I_mpp_m = db.Column('I_mpp_manufacturer[A]', db.Float,
@@ -225,6 +248,9 @@ class PvModule(db.Model, Base):
     #                     info={'label': 'Spannungs-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
     # _a_I_sc = db.Column('current_temperature_coef_sc_manufacturer[%/K]', db.Float,
     #                     info={'label': 'Strom-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
+
+    pv_module_id = db.Column(db.Integer, db.ForeignKey('pv_module.id'))
+    pv_module = db.relationship('PvModule', back_populates='manufacturer_data')
 
     @property
     def U_mpp_m(self):
@@ -254,7 +280,13 @@ class PvModule(db.Model, Base):
     def a_U_oc(self):
         return self.get_value_with_unit('_a_U_oc')
 
+
+class FlasherData(db.Model, Base):
+    __tablename__ = 'flasher_data'
+
     # flasher data
+    id = db.Column(db.Integer, primary_key=True)
+
     _G_f = db.Column('radiation_flasher[W/m2]', db.Float,
                      info={'label': 'Einstrahlung', 'unit': 'W / m2', 'origin': 'Flasher-Messung'})
     _T_module_f = db.Column('module_temperature_flasher[°C]', db.Float,
@@ -269,6 +301,9 @@ class PvModule(db.Model, Base):
                         info={'label': 'Kurzschlussstrom', 'unit': 'A', 'origin': 'Flasher-Messung'})
     _ff_f = db.Column('form_factor_flasher[-]', db.Float,
                       info={'label': 'Form-Faktor', 'unit': '-', 'origin': 'Flasher-Messung'})
+
+    pv_module_id = db.Column(db.Integer, db.ForeignKey('pv_module.id'))
+    pv_module = db.relationship('PvModule', back_populates='flasher_data')
 
     @property
     def G_f(self):
@@ -297,6 +332,3 @@ class PvModule(db.Model, Base):
     @property
     def ff_f(self):
         return self.get_value_with_unit('_ff_f')
-
-    def __repr__(self):
-        return f'PV-Modul ({self.model})'

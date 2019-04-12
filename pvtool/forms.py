@@ -24,6 +24,5 @@ class MeasurementForm(RegistrationForm):
 
 
 def insert_form_into_database():
-
     pass
 

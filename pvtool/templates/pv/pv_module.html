@@ -29,4 +29,6 @@
 </table>
 
 <a href="{{ url_for('pv.pv_modules') }}" class="btn btn-primary">Alle PV-Module anzeigen</a>
+<a href="{{ url_for('pv.edit_pv_module', id=module.id) }}" class="btn btn-info">Modul bearbeiten</a>
+<a href="{{ url_for('pv.remove_pv_module', id=module.id)}}" class="btn btn-danger">Modul entfernen</a>
 {% endblock %}

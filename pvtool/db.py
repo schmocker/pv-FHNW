@@ -78,10 +78,9 @@ class Measurement(db.Model, Base):
     weather = db.Column(db.String(80), nullable=False, info={'label': 'Wetter'})
     producer = db.Column(db.String(80), nullable=False, info={'label': 'Erfasser'})
 
-    pv_module_id = db.Column(db.Integer, db.ForeignKey('pv_module.id'))
-    pv_module = db.relationship('PvModule', back_populates='measurement')
+    pv_module_id = db.Column(db.Integer, db.ForeignKey('pv_module.id'), nullable=False)
 
-    measurement_values = db.relationship('MeasurementValues')
+    measurement_values = db.relationship('MeasurementValues', backref='measurement')
 
 
 class MeasurementValues(db.Model, Base):
@@ -104,8 +103,7 @@ class MeasurementValues(db.Model, Base):
     _U_G_ref = db.Column('U_G_ref[V]', db.Float, nullable=False,
                          info={'label': 'Spannung des Referenzzelle', 'unit': 'V'})
 
-    measurement_id = db.Column(db.Integer, db.ForeignKey('measurement.id'))
-    measurement = db.relationship('Measurement', back_populates='measurement_values')
+    measurement_id = db.Column(db.Integer, db.ForeignKey('measurement.id'), nullable=False)
 
     @classmethod
     def get_xlsx_template(cls):
@@ -218,7 +216,7 @@ class PvModule(db.Model, Base):
     manufacturer_data = db.relationship('ManufacturerData', uselist=False, back_populates='pv_module')
     flasher_data = db.relationship('FlasherData', uselist=False, back_populates='pv_module')
 
-    measurement = db.relationship('Measurement')
+    measurements = db.relationship('Measurement', backref='pv_module', lazy=True)
 
     @property
     def R_shunt(self):

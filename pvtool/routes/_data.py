@@ -34,3 +34,6 @@ def template():
 @data_routes.route('/data/upload')
 def upload():
     return ('data')
+
+# @data_routes.route():
+#     pass

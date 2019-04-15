@@ -1,47 +1,22 @@
 {% extends 'layout.html' %}
-
+{% from '_formhelpers.html' import render_field %}
 {% block content %}
 
     <h1>PV-Modul hinzufügen</h1>
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
-        <p>
-            {{ form.modellnummer.label }}<br>
-            {{ form.modellnummer(size=32) }}
-        </p>
-        <p>
-            {{ form.hersteller.label }}<br>
-            {{ form.hersteller(size=32) }}
-        </p>
-        <p>
-            {{ form.zelltyp.label }}<br>
-            {{ form.zelltyp(size=32) }}
-        </p>
-        <p>
-            {{ form.neupreis.label }}<br>
-            {{ form.neupreis(size=32) }}
-        </p>
-        <p>
-            {{ form.bemerkung.label }}<br>
-            {{ form.bemerkung(size=32) }}
-        </p>
-        <p>
-            {{ form.laenge.label }}<br>
-            {{ form.laenge(size=32) }}
-        </p>
-        <p>
-            {{ form.breite.label }}<br>
-            {{ form.breite(size=32) }}
-        </p>
-        <p>
-            {{ form.widerstand.label }}<br>
-            {{ form.widerstand(size=32) }}
-        </p>
-        <p>
-            {{ form.accept_rules() }} {{ form.accept_rules.label }}
-        </p>
+        <d1>
+            {{ render_field(form.modellnummer) }}
+            {{ render_field(form.hersteller) }}
+            {{ render_field(form.zelltyp) }}
+            {{ render_field(form.neupreis) }}
+            {{ render_field(form.bemerkung) }}
+            {{ render_field(form.laenge) }}
+            {{ render_field(form.breite) }}
+            {{ render_field(form.widerstand) }}
+            {{ render_field(form.accept_rules) }}
+        </d1>
         <p> {{ form.submit() }}</p>
     </form>
-    <a href="{{ url_for('pv.pv_modules') }}" class="btn btn-primary">Alle PV-Module anzeigen</a>
 
 {% endblock %}

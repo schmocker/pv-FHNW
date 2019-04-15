@@ -46,7 +46,7 @@ def add_pv_module():
                                  )
         db.session.add(new_pv_module)
         db.session.commit()
-        print("The awesome module: ", new_pv_module)
+        return redirect('/pv_modules')
 
     return render_template('pv/add_pv_module.html', form=form)
 
@@ -56,7 +56,7 @@ def edit_pv_module():
     pv_id = request.args.get('id', type=int)
     form = PvModuleForm()
     if request.method == 'POST':
-        module_entry = PvModule.query.filter(PvModule.id == pv_id).first()
+        module_entry = db.session.query(PvModule).filter(PvModule.id == pv_id).first()
         print("module entry", module_entry)
         form = form.process(request.method, module_entry)
 

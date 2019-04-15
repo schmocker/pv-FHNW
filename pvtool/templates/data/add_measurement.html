@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% from '_formhelpers.html' import render_field %}
+{% block content %}
+
+    <h1>Messreihe hinzufügen</h1>
+    <form action="" method="post" novalidate enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        {{ render_field(form.mess_datum) }}
+        {{ render_field(form.mess_reihe) }}
+        {{ render_field(form.wetter) }}
+        {{ render_field(form.erfasser) }}
+        {{ render_field(form.hersteller) }}
+        {{ render_field(form.modellnummer) }}
+
+        {{ render_field(form.messungen) }}
+
+        {{ render_field(form.accept_rules) }}
+        <p> {{ form.submit() }}</p>
+    </form>
+
+
+{% endblock %}

@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from .routes._main import main_routes
 from .db import db, Measurement, PvModule
 import configparser
+from .forms import MeasurementForm
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'pvtool/files')
 ALLOWED_EXTENSIONS = set(['csv', 'xls', 'xlsx'])
@@ -36,6 +37,38 @@ def upload_file():
             #                         filename=filename))
     return render_template('main/upload.html')
 
+
+@main_routes.route('/add_measurement', methods=['GET', 'POST'])
+def add_measurement():
+    """Ugly code"""
+    form = MeasurementForm()
+    modules = db.session.query(PvModule).all()
+
+    form.hersteller.choices = []
+    form.modellnummer.choices = []
+    for module in modules:
+        if (module.manufacturer, module.manufacturer) not in form.hersteller.choices:
+            form.hersteller.choices.append((module.manufacturer, module.manufacturer))
+        if (module.model, module.model) not in form.modellnummer.choices:
+            form.modellnummer.choices.append((module.model, module.model))
+
+    if request.method == 'POST':
+        chosen_module = db.session.query(PvModule).filter(PvModule.model == form.modellnummer.data).first()
+        new_measurement = Measurement(date=form.mess_datum.data,
+                                      measurement_series=form.mess_reihe.data,
+                                      weather=form.wetter.data,
+                                      producer=form.erfasser.data,
+                                      )
+        # save file that was uploaded
+        if form.validate_on_submit():
+            f = form.messungen.data
+            filename = secure_filename(f.filename)
+            f.save(os.path.join(UPLOAD_FOLDER, filename))
+        chosen_module.measurements.append(new_measurement)
+        db.session.add(chosen_module)
+        db.session.commit()
+
+    return render_template('data/add_measurement.html', form=form)
 
 def process_file(file_type='pvmodule', filename=''):
     """open the file containing data and return table as pandas dataframe"""
@@ -75,6 +108,21 @@ def convert_df_columns_to_desired_type(type_of_data, df):
     for column in df:
         df[column] = df[column].astype(config[type_of_data][column])
 
+
+def commit_measurement_values_to_database(df):
+    """take data frame and write it as dictionary and insert into sql alchemy"""
+    print("current columns: ", df.columns)
+
+    # format: dict like {index -> {column -> value}}
+    dictionary_for_insertion = df.to_dict(orient='index')
+    print(dictionary_for_insertion)
+
+    # "**" star operator take dictionary for values in ORM model
+    for key in dictionary_for_insertion:
+        print(dictionary_for_insertion[key])
+        new_data = Measurement(**(dictionary_for_insertion[key]))
+        db.session.add(new_data)
+        db.session.commit()
 
 def commit_dataframe_to_database(df, type_of_data="MEASUREMENT"):
     """take data frame and write it as dictionary and insert into sql alchemy"""

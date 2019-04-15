@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import Form, BooleanField, StringField, validators, DateField, SelectField, SubmitField, FloatField
+from flask_wtf.file import FileField, FileRequired
+from wtforms import Form, BooleanField, StringField, validators, SelectField, SubmitField, FloatField
 
 
 class RegistrationForm(FlaskForm):
@@ -20,7 +21,14 @@ class PvModuleForm(RegistrationForm):
 
 
 class MeasurementForm(RegistrationForm):
-    measurement_date = DateField('Measurement Date')
+    mess_datum = StringField('Messdatum')
+    mess_reihe = StringField('Messreihe')
+    wetter = StringField('Wetter')
+    erfasser = StringField('Erfasser')
+    modellnummer = SelectField('Modellnummer')
+    hersteller = SelectField('Hersteller')
+    messungen = FileField(validators=[FileRequired()])
+
 
 
 def insert_form_into_database():

@@ -3,7 +3,7 @@ import pandas as pd
 from flask import Flask, flash, request, redirect, url_for, send_from_directory, render_template
 from werkzeug.utils import secure_filename
 from .routes._main import main_routes
-from .db import db, Measurement, PvModule
+from .db import db, Measurement, PvModule, MeasurementValues
 import configparser
 from .forms import MeasurementForm
 
@@ -46,6 +46,8 @@ def add_measurement():
 
     form.hersteller.choices = []
     form.modellnummer.choices = []
+
+    # populate select field with available distinct modules
     for module in modules:
         if (module.manufacturer, module.manufacturer) not in form.hersteller.choices:
             form.hersteller.choices.append((module.manufacturer, module.manufacturer))
@@ -54,28 +56,35 @@ def add_measurement():
 
     if request.method == 'POST':
         chosen_module = db.session.query(PvModule).filter(PvModule.model == form.modellnummer.data).first()
+        # noinspection PyArgumentList
         new_measurement = Measurement(date=form.mess_datum.data,
                                       measurement_series=form.mess_reihe.data,
                                       weather=form.wetter.data,
                                       producer=form.erfasser.data,
                                       )
         # save file that was uploaded
-        if form.validate_on_submit():
-            f = form.messungen.data
-            filename = secure_filename(f.filename)
-            f.save(os.path.join(UPLOAD_FOLDER, filename))
+        # if form.validate_on_submit():
+        f = form.messungen.data
+        filename = secure_filename(f.filename)
+        f.save(os.path.join(UPLOAD_FOLDER, filename))
+
         chosen_module.measurements.append(new_measurement)
+        process_data_file(filename, new_measurement)
         db.session.add(chosen_module)
         db.session.commit()
 
     return render_template('data/add_measurement.html', form=form)
 
-def process_file(file_type='pvmodule', filename=''):
-    """open the file containing data and return table as pandas dataframe"""
+
+def process_data_file(filename, linked_measurement):
+    """open the file containing data and pass table as pandas dataframe with measurement to be linked"""
     path_to_file = os.path.join(UPLOAD_FOLDER, filename)
     with open(path_to_file) as f:
-        dataframe = pd.read_csv(f, sep=';')
-        commit_dataframe_to_database(dataframe, file_type)
+        if filename.endswith('.csv'):
+            dataframe = pd.read_csv(f, sep=',')
+        elif filename.endswith(('.xls', '.xlsx')):
+            dataframe = pd.read_excel(f)
+        commit_measurement_values_to_database(dataframe, linked_measurement)
     os.remove(path_to_file)
 
 
@@ -91,7 +100,7 @@ def get_columns_of_table(type_of_data):
         return
     print(config.sections())
     columns = [option for option in config[type_of_data]]
-    print("new columns: ",columns)
+    print("new columns: ", columns)
     return columns
 
 
@@ -109,9 +118,11 @@ def convert_df_columns_to_desired_type(type_of_data, df):
         df[column] = df[column].astype(config[type_of_data][column])
 
 
-def commit_measurement_values_to_database(df):
+def commit_measurement_values_to_database(df, linked_measurement):
     """take data frame and write it as dictionary and insert into sql alchemy"""
     print("current columns: ", df.columns)
+    df.columns = get_columns_of_table("MEASUREMENT")
+    convert_df_columns_to_desired_type("MEASUREMENT", df)
 
     # format: dict like {index -> {column -> value}}
     dictionary_for_insertion = df.to_dict(orient='index')
@@ -120,9 +131,11 @@ def commit_measurement_values_to_database(df):
     # "**" star operator take dictionary for values in ORM model
     for key in dictionary_for_insertion:
         print(dictionary_for_insertion[key])
-        new_data = Measurement(**(dictionary_for_insertion[key]))
-        db.session.add(new_data)
-        db.session.commit()
+        new_measurement_values = MeasurementValues(**(dictionary_for_insertion[key]))
+        linked_measurement.measurement_values.append(new_measurement_values)
+        db.session.add(linked_measurement)
+    db.session.commit()
+
 
 def commit_dataframe_to_database(df, type_of_data="MEASUREMENT"):
     """take data frame and write it as dictionary and insert into sql alchemy"""

@@ -3,7 +3,8 @@ import tempfile
 
 import pytest
 
-from pvtool import create_app
+from pvtool import create_app, TestingConfig
+
 
 @pytest.fixture
 def app():
@@ -11,10 +12,7 @@ def app():
     db_fd: file handle for temporary database"""
     db_fd, db_path = tempfile.mkstemp()
 
-    app = create_app({
-        'TESTING': True,
-        'DATABASE': db_path
-    })
+    app = create_app(TestingConfig)
 
     yield app
 
@@ -24,11 +22,9 @@ def app():
 
 @pytest.fixture
 def client(app):
-    """ Use client to make requests to application"""
     return app.test_client()
 
 
 @pytest.fixture
 def runner(app):
-    """ Create runner that registers click commands"""
     return app.test_cli_runner()

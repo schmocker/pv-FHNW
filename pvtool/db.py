@@ -1,4 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask import g, current_app
+import sqlite3
 import numpy as np
 import pint
 from pint.converters import ScaleConverter
@@ -12,6 +14,16 @@ db = SQLAlchemy()
 
 ureg = pint.UnitRegistry()
 ureg.define(UnitDefinition('percent', 'pct', (), ScaleConverter(1 / 100.0)))
+
+
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(
+            current_app.config['CONFIG'],
+            detect_types=sqlite3.PARSE_DECLTYPES
+        )
+        g.db.row_factory
+    return g.db
 
 
 class Base:
@@ -73,6 +85,7 @@ class Measurement(db.Model, Base):
 
     id = db.Column(db.Integer, primary_key=True, info={'label': '#'})
 
+    # TODO: confusion with different names measurement_series and measurement_values
     date = db.Column(db.String, nullable=False, info={'label': 'Datum', 'format': 'YY-MM-DD'})
     measurement_series = db.Column(db.String(80), nullable=False, info={'label': 'Messreihe'})
     weather = db.Column(db.String(80), nullable=False, info={'label': 'Wetter'})

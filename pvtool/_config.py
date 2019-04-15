@@ -23,7 +23,9 @@ class Config(object):
 
 
 class TestingConfig(Config):
+    BCRYPT_LOG_ROUNDS = 4
     TESTING = True
+    WTF_CSRF_ENABLED = False
     # DATABASE
     DB_NAME = "test"
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(ROOT_DIR,"temp","test")}.db'

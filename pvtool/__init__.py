@@ -7,17 +7,12 @@ from .routes import main_routes, pv_modules_routes, page_not_found, internal_ser
 from .file_upload import upload_file
 
 
-def create_app(test_config=None):
-    config = Config()
+def create_app(config):
     # create pvtool
     app = Flask('pvtool')
 
     # TODO: Update this if other configs are needed
-    if test_config is not None:
-        config = TestingConfig()
-
     app.config.from_object(config)
-    print(app.config)
     # database
     db.init_app(app)
     # create db

@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1>Messungen</h1>
+<table class="table table-bordered  table-hover">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Datum</th>
+        <th scope="col">Messreihe</th>
+        <th scope="col">Wetter</th>
+        <th scope="col">Erfasser</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for measurement in measurements %}
+    {% set url = url_for('measurement.measurement', id=measurement.id) %}
+    <tr onclick="window.location.href = '{{ url }}';" style="cursor: pointer">
+        <th scope="row">{{ measurement.id }}</th>
+        <td>{{ measurement.date }}</td>
+        <td>{{ measurement.measurement_series }}</td>
+        <td>{{ measurement.weather }}</td>
+        <td>{{ measurement.producer }}</td>
+    </tr>
+
+    {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('measurement.add_measurement') }}" class="btn btn-primary">Messung hinzufügen</a>
+{% endblock %}

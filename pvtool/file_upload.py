@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from flask import Flask, flash, request, redirect, url_for, send_from_directory, render_template
 from werkzeug.utils import secure_filename
-from .routes._main import main_routes
+from .routes import measurement_routes
 from .db import db, Measurement, PvModule, MeasurementValues
 import configparser
 from .forms import MeasurementForm
@@ -15,7 +15,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@main_routes.route('/upload', methods=['GET', 'POST'])
+@measurement_routes.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
@@ -38,7 +38,7 @@ def upload_file():
     return render_template('main/upload.html')
 
 
-@main_routes.route('/add_measurement', methods=['GET', 'POST'])
+@measurement_routes.route('/add_measurement', methods=['GET', 'POST'])
 def add_measurement():
     """Ugly code"""
     form = MeasurementForm()
@@ -73,7 +73,7 @@ def add_measurement():
         db.session.add(chosen_module)
         db.session.commit()
 
-    return render_template('data/add_measurement.html', form=form)
+    return render_template('measurement/add_measurement.html', form=form)
 
 
 def process_data_file(filename, linked_measurement):

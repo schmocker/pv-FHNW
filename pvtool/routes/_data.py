@@ -29,11 +29,3 @@ def data():
 def template():
     data = Measurement.get_xlsx_template()
     return send_file(data, attachment_filename="template.xlsx", as_attachment=True)
-
-
-@data_routes.route('/data/upload')
-def upload():
-    return ('data')
-
-# @data_routes.route():
-#     pass

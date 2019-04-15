@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<h1>Messung: {{ module.model }}</h1>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Bezeichnung</th>
+        <th scope="col">Datenursprung</th>
+        <th scope="col">Wert</th>
+        <th scope="col">Einheit</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% set cls = module.__class__ %}
+    {% for col_name in cls.get_column_names() %}
+    {% set col = cls|attr(col_name) %}
+    {% if col.info['label'] %}
+    <tr>
+        <th scope="row">{{ col.info['label'] }}</th>
+        <td>{{ col.info['origin'] }}</td>
+        <td class="text-right">{{ module.get_value(col_name) }}</td>
+        <td>{{ col.info['unit'] }}</td>
+    </tr>{% endif %}
+    {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('pv.pv_modules') }}" class="btn btn-primary">Alle PV-Module anzeigen</a>
+<a href="{{ url_for('measurement.remove_measurement', id=measurement.id)}}" class="btn btn-danger">Messung entfernen</a>
+{% endblock %}

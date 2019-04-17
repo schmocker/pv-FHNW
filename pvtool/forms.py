@@ -18,6 +18,27 @@ class PvModuleForm(RegistrationForm):
     laenge = FloatField('Länge[m]', [validators.length(min=5, max=40)])
     breite = FloatField('Breite[m]', [validators.length(min=5, max=40)])
     widerstand = FloatField('Widerstand[Ohm]', [validators.data_required])
+    pv_modul_file = FileField('PV Module')
+
+
+class ManufacturerDataForm(RegistrationForm):
+    u_mpp_m = FloatField('Spannung MPP [V]')
+    i_mpp_m = FloatField('Strom MPP [A]')
+    u_ll_m = FloatField('Leerlaufspannung [V]')
+    i_ks_m = FloatField('Kurzschlussstrom [A]')
+    ff_m = FloatField('Formfaktor')
+    u_temp_koeff_m = FloatField('Spannungstemperaturkoeffizient [%/°C]')
+    i_temp_koeff_m = FloatField('Stromtemperaturkoeffizient [%/°C]')
+
+
+class FlasherDataForm(RegistrationForm):
+    einstrahlung_fl = FloatField('Einstrahlung[W/m^2]')
+    modultemperatur_fl = FloatField('Modultemperatur[°C]')
+    u_mpp_fl= FloatField('Spannung MPP [V]')
+    i_mpp_fl = FloatField('Strom MPP [A]')
+    u_ll_fl = FloatField('Leerlaufspannung [V]')
+    i_ks_fl = FloatField('Kurzschlussstrom [A]')
+    ff_fl = FloatField('Formfaktor')
 
 
 class MeasurementForm(RegistrationForm):
@@ -28,9 +49,3 @@ class MeasurementForm(RegistrationForm):
     modellnummer = SelectField('Modellnummer')
     hersteller = SelectField('Hersteller')
     messungen = FileField(validators=[FileRequired()])
-
-
-
-def insert_form_into_database():
-    pass
-

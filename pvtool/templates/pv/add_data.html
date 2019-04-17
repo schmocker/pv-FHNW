@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% from '_formhelpers.html' import render_field %}
+{% block content %}
+
+    <h1>PV-Daten hinzufügen</h1>
+    <form action="" method="post" novalidate>
+        {{ form_fl.hidden_tag() }}
+        <d1>
+            {{ render_field(form_fl.einstrahlung_fl) }}
+            {{ render_field(form_fl.modultemperatur_fl) }}
+            {{ render_field(form_fl.u_mpp_fl) }}
+            {{ render_field(form_fl.i_mpp_fl) }}
+            {{ render_field(form_fl.u_ll_fl) }}
+            {{ render_field(form_fl.i_ks_fl) }}
+            {{ render_field(form_fl.ff_fl) }}
+        </d1>
+        <p> {{ form_fl.submit() }}</p>
+    </form>
+    <form action="" method="post" novalidate>
+        {{ form_m.hidden_tag() }}
+        <d1>
+            {{ render_field(form_m.u_mpp_m) }}
+            {{ render_field(form_m.i_mpp_m) }}
+            {{ render_field(form_m.u_ll_m) }}
+            {{ render_field(form_m.i_ks_m) }}
+            {{ render_field(form_m.ff_m) }}
+        </d1>
+        <p> {{ form_m.submit() }}</p>
+    </form>
+
+{% endblock %}

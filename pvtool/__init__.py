@@ -1,18 +1,8 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_navigation import Navigation
-from flask_login import LoginManager, login_manager
 from pvtool._config import Config, TestingConfig
 from pvtool.db import db, PvModule
 from .routes import main_routes, pv_modules_routes, measurement_routes, page_not_found, internal_server_error, data_routes
-from .file_upload import upload_file
-
-
-class User():
-    def __init__(self):
-        self.is_authenticated
-        self.is_active
-        self.is_anonymous
 
 
 def create_app(config):

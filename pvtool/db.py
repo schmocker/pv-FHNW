@@ -226,8 +226,8 @@ class PvModule(db.Model, Base):
     width = db.Column(db.Float, info={'label': 'Breite', 'unit': 'm'})
     shunt_resistance = db.Column(db.Float, info={'label': 'Shunt-Widerstand', 'unit': 'Ohm'})
 
-    manufacturer_data = db.relationship('ManufacturerData', uselist=False, back_populates='pv_module')
-    flasher_data = db.relationship('FlasherData', uselist=False, back_populates='pv_module')
+    manufacturer_data = db.relationship('ManufacturerData', uselist=False, backref='pv_module', lazy=True)
+    flasher_data = db.relationship('FlasherData', uselist=False, backref='pv_module', lazy=True)
 
     measurements = db.relationship('Measurement', backref='pv_module', lazy=True)
 
@@ -245,23 +245,15 @@ class ManufacturerData(db.Model, Base):
     # manufacturer data
     id = db.Column(db.Integer, primary_key=True)
 
-    _U_mpp_m = db.Column('U_mpp_manufacturer[V]', db.Float,
-                         info={'label': 'Spannung bei MPP', 'unit': 'V', 'origin': 'Hersteller'})
-    _I_mpp_m = db.Column('I_mpp_manufacturer[A]', db.Float,
-                         info={'label': 'Strom bei MPP', 'unit': 'A', 'origin': 'Hersteller'})
-    _U_oc_m = db.Column('U_oc_manufacturer[V]', db.Float,
-                        info={'label': 'Leerlaufspannung', 'unit': 'V', 'origin': 'Hersteller'})
-    _I_sc_m = db.Column('I_sc_manufacturer[A]', db.Float,
-                        info={'label': 'Kurzschlussstrom', 'unit': 'A', 'origin': 'Hersteller'})
-    _ff_m = db.Column('form_factor_manufacturer[-]', db.Float,
-                      info={'label': 'Form-Faktor', 'unit': '-', 'origin': 'Hersteller'})
-    # _a_U_oc = db.Column('voltage_temperature_coef_oc_manufacturer[%/K]', db.Float,
-    #                     info={'label': 'Spannungs-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
-    # _a_I_sc = db.Column('current_temperature_coef_sc_manufacturer[%/K]', db.Float,
-    #                     info={'label': 'Strom-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
+    _U_mpp_m = db.Column(db.Float, info={'label': 'Spannung bei MPP', 'unit': 'V', 'origin': 'Hersteller'})
+    _I_mpp_m = db.Column(db.Float, info={'label': 'Strom bei MPP', 'unit': 'A', 'origin': 'Hersteller'})
+    _U_oc_m = db.Column(db.Float, info={'label': 'Leerlaufspannung', 'unit': 'V', 'origin': 'Hersteller'})
+    _I_sc_m = db.Column(db.Float, info={'label': 'Kurzschlussstrom', 'unit': 'A', 'origin': 'Hersteller'})
+    _ff_m = db.Column(db.Float, info={'label': 'Form-Faktor', 'unit': '-', 'origin': 'Hersteller'})
+    _a_U_oc = db.Column(db.Float, info={'label': 'Spannungs-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
+    _a_I_sc = db.Column(db.Float, info={'label': 'Strom-Temperatur-Koeffizient', 'unit': '% / K', 'origin': 'Hersteller'})
 
     pv_module_id = db.Column(db.Integer, db.ForeignKey('pv_module.id'))
-    pv_module = db.relationship('PvModule', back_populates='manufacturer_data')
 
     @property
     def U_mpp_m(self):
@@ -298,23 +290,15 @@ class FlasherData(db.Model, Base):
     # flasher data
     id = db.Column(db.Integer, primary_key=True)
 
-    _G_f = db.Column('radiation_flasher[W/m2]', db.Float,
-                     info={'label': 'Einstrahlung', 'unit': 'W / m2', 'origin': 'Flasher-Messung'})
-    _T_module_f = db.Column('module_temperature_flasher[°C]', db.Float,
-                            info={'label': 'Modul-Temperatur', 'unit': '°C', 'origin': 'Flasher-Messung'})
-    _U_mpp_f = db.Column('U_mpp_flasher[V]', db.Float,
-                         info={'label': 'Spannung bei MPP', 'unit': 'V', 'origin': 'Flasher-Messung'})
-    _I_mpp_f = db.Column('I_mpp_flasher[A]', db.Float,
-                         info={'label': 'Strom bei MPP', 'unit': 'A', 'origin': 'Flasher-Messung'})
-    _U_oc_f = db.Column('U_oc_flasher[V]', db.Float,
-                        info={'label': 'Leerlaufspannung', 'unit': 'V', 'origin': 'Flasher-Messung'})
-    _I_sc_f = db.Column('I_sc_flasher[A]', db.Float,
-                        info={'label': 'Kurzschlussstrom', 'unit': 'A', 'origin': 'Flasher-Messung'})
-    _ff_f = db.Column('form_factor_flasher[-]', db.Float,
-                      info={'label': 'Form-Faktor', 'unit': '-', 'origin': 'Flasher-Messung'})
+    _G_f = db.Column(db.Float, info={'label': 'Einstrahlung', 'unit': 'W / m2', 'origin': 'Flasher-Messung'})
+    _T_module_f = db.Column(db.Float, info={'label': 'Modul-Temperatur', 'unit': '°C', 'origin': 'Flasher-Messung'})
+    _U_mpp_f = db.Column(db.Float, info={'label': 'Spannung bei MPP', 'unit': 'V', 'origin': 'Flasher-Messung'})
+    _I_mpp_f = db.Column(db.Float, info={'label': 'Strom bei MPP', 'unit': 'A', 'origin': 'Flasher-Messung'})
+    _U_oc_f = db.Column(db.Float, info={'label': 'Leerlaufspannung', 'unit': 'V', 'origin': 'Flasher-Messung'})
+    _I_sc_f = db.Column(db.Float, info={'label': 'Kurzschlussstrom', 'unit': 'A', 'origin': 'Flasher-Messung'})
+    _ff_f = db.Column(db.Float, info={'label': 'Form-Faktor', 'unit': '-', 'origin': 'Flasher-Messung'})
 
     pv_module_id = db.Column(db.Integer, db.ForeignKey('pv_module.id'))
-    pv_module = db.relationship('PvModule', back_populates='flasher_data')
 
     @property
     def G_f(self):

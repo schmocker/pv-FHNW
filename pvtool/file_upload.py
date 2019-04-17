@@ -1,11 +1,7 @@
 import os
 import pandas as pd
-from flask import Flask, flash, request, redirect, url_for, send_from_directory, render_template
-from werkzeug.utils import secure_filename
-from .routes import measurement_routes
-from .db import db, Measurement, PvModule, MeasurementValues
+from .db import db, Measurement, PvModule, FlasherData, ManufacturerData, MeasurementValues
 import configparser
-from .forms import MeasurementForm
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'pvtool/files')
 ALLOWED_EXTENSIONS = set(['csv', 'xls', 'xlsx'])
@@ -13,67 +9,6 @@ ALLOWED_EXTENSIONS = set(['csv', 'xls', 'xlsx'])
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-@measurement_routes.route('/upload', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            flash('file chosen')
-            process_file('MEASUREMENT', filename)
-            # return redirect(url_for('uploaded_file',
-            #                         filename=filename))
-    return render_template('main/upload.html')
-
-
-@measurement_routes.route('/add_measurement', methods=['GET', 'POST'])
-def add_measurement():
-    """Ugly code"""
-    form = MeasurementForm()
-    modules = db.session.query(PvModule).all()
-
-    form.hersteller.choices = []
-    form.modellnummer.choices = []
-
-    # populate select field with available distinct modules
-    for module in modules:
-        if (module.manufacturer, module.manufacturer) not in form.hersteller.choices:
-            form.hersteller.choices.append((module.manufacturer, module.manufacturer))
-        if (module.model, module.model) not in form.modellnummer.choices:
-            form.modellnummer.choices.append((module.model, module.model))
-
-    if request.method == 'POST':
-        chosen_module = db.session.query(PvModule).filter(PvModule.model == form.modellnummer.data).first()
-        # noinspection PyArgumentList
-        new_measurement = Measurement(date=form.mess_datum.data,
-                                      measurement_series=form.mess_reihe.data,
-                                      weather=form.wetter.data,
-                                      producer=form.erfasser.data,
-                                      )
-        # save file that was uploaded
-        # if form.validate_on_submit():
-        f = form.messungen.data
-        filename = secure_filename(f.filename)
-        f.save(os.path.join(UPLOAD_FOLDER, filename))
-
-        chosen_module.measurements.append(new_measurement)
-        process_data_file(filename, new_measurement)
-        db.session.add(chosen_module)
-        db.session.commit()
-
-    return render_template('measurement/add_measurement.html', form=form)
 
 
 def process_data_file(filename, linked_measurement):
@@ -88,7 +23,19 @@ def process_data_file(filename, linked_measurement):
     os.remove(path_to_file)
 
 
+def process_pv_module_file(filename):
+    path_to_file = os.path.join(UPLOAD_FOLDER, filename)
+    with open(path_to_file) as f:
+        if filename.endswith('.csv'):
+            dataframe = pd.read_csv(f, sep=',')
+        elif filename.endswith(('.xls', '.xlsx')):
+            dataframe = pd.read_excel(f)
+    commit_pvmodule_to_database(dataframe)
+    os.remove(path_to_file)
+
+
 def get_columns_of_table(type_of_data):
+    """gets columns for dataframe from configfile"""
     config = configparser.ConfigParser()
     # preserve case
     config.optionxform = lambda option: option
@@ -137,6 +84,32 @@ def commit_measurement_values_to_database(df, linked_measurement):
     db.session.commit()
 
 
+def commit_pvmodule_to_database(df):
+    df.columns = get_columns_of_table("PVMODULE")
+    convert_df_columns_to_desired_type("PVMODULE", df)
+
+    pv_module_df = df[df.columns[0:8]]
+    pv_module_dict = pv_module_df.to_dict(orient='index')
+
+    manufacturer_df = df[df.columns[8:15]]
+    manufacturer_dict = manufacturer_df.to_dict(orient='index')
+
+    flasher_df = df[df.columns[15:22]]
+    flasher_dict = flasher_df.to_dict(orient='index')
+    # format: dict like {index -> {column -> value}}
+
+    for key in pv_module_dict:
+        new_pv_module = PvModule(**(pv_module_dict[key]))
+        new_manufacturer_data = ManufacturerData(**(manufacturer_dict[key]))
+        new_flasher_data = FlasherData(**(flasher_dict[key]))
+        new_pv_module.manufacturer_data = new_manufacturer_data
+        new_pv_module.flasher_data = new_flasher_data
+
+        db.session.add(new_pv_module)
+        db.session.commit()
+
+
+
 def commit_dataframe_to_database(df, type_of_data="MEASUREMENT"):
     """take data frame and write it as dictionary and insert into sql alchemy"""
     print("current columns: ", df.columns)
@@ -158,4 +131,3 @@ def commit_dataframe_to_database(df, type_of_data="MEASUREMENT"):
             db.session.add(new_data)
     else:
         raise ValueError("dataframe from excel was neither labeled measurement or pv_module")
-

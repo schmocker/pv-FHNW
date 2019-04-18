@@ -179,7 +179,7 @@ class MeasurementValues(db.Model, Base):
 
     @property
     def I_module(self):
-        return (self.U_shunt / self.pv_module.R_shunt).to(ureg.A)
+        return (self.U_shunt / self.measurement.pv_module.R_shunt).to(ureg.A)
 
     @property
     def U_module_stc(self):

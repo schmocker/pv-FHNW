@@ -109,7 +109,6 @@ def commit_pvmodule_to_database(df):
         db.session.commit()
 
 
-
 def commit_dataframe_to_database(df, type_of_data="MEASUREMENT"):
     """take data frame and write it as dictionary and insert into sql alchemy"""
     print("current columns: ", df.columns)

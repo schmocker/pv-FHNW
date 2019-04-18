@@ -3,6 +3,7 @@
 {% block content %}
 <h1>PV @ FHNW</h1>
 
-Add link to: "Messung hinzufügen, Template herunterladen"
+<a href="{{ url_for('data.template') }}" class="btn btn-outline-dark">Template herunterladen</a>
+<a href="{{ url_for('measurement.add_measurement') }}" class="btn btn-outline-dark">Messung hinzufügen</a>
 
 {% endblock %}

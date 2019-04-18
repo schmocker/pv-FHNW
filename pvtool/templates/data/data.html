@@ -22,10 +22,10 @@
         {% for d in data %}
             <tr>
                 <th scope="row">{{ d.id }}</th>
-                <td>{{ d.pv_module }}</td>
-                <td>{{ d.date.strftime('%d.%m.%Y') }}</td>
-                <td>{{ d.measurement_series }}</td>
-                <td>{{ d.weather }}</td>
+                <td>{{ d.measurement.pv_module.model }}</td>
+                <td>{{ d.measurement.date }}</td>
+                <td>{{ d.measurement.measurement_series }}</td>
+                <td>{{ d.measurement.weather }}</td>
                 <td class="text-right">{{ d.U_module }}</td>
                 <td class="text-right">{{ d.I_module }}</td>
             </tr>

@@ -69,18 +69,15 @@ def add_measurement():
     form = MeasurementForm()
     modules = db.session.query(PvModule).all()
 
-    form.hersteller.choices = []
-    form.modellnummer.choices = []
+    form.pv_modul.choices = []
 
     # populate select field with available distinct modules
     for module in modules:
-        if (module.manufacturer, module.manufacturer) not in form.hersteller.choices:
-            form.hersteller.choices.append((module.manufacturer, module.manufacturer))
-        if (module.model, module.model) not in form.modellnummer.choices:
-            form.modellnummer.choices.append((module.model, module.model))
+        if (module.model, str(module.manufacturer) + ' ' + str(module.model)) not in form.pv_modul.choices:
+            form.pv_modul.choices.append((module.model, str(module.manufacturer) + ' ' + str(module.model)))
 
     if request.method == 'POST':
-        chosen_module = db.session.query(PvModule).filter(PvModule.model == form.modellnummer.data).first()
+        chosen_module = db.session.query(PvModule).filter(PvModule.model == form.pv_modul.data[1]).first()
         # noinspection PyArgumentList
         new_measurement = Measurement(date=form.mess_datum.data,
                                       measurement_series=form.mess_reihe.data,

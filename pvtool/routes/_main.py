@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, flash, send_file
+from flask import Blueprint, render_template, flash, jsonify, request
 
 main_routes = Blueprint('main', __name__, template_folder='templates')
 
@@ -7,12 +7,22 @@ main_routes = Blueprint('main', __name__, template_folder='templates')
 def home():
     return render_template('main/home.html')
 
+
 @main_routes.errorhandler(404)
 def page_not_found(e):
     flash(e.description, 'danger')
     return render_template('main/404.html'), 404
 
+
 @main_routes.errorhandler(500)
 def internal_server_error(e):
     flash(e.description, 'danger')
     return render_template('main/500.html'), 500, 'hallo'
+
+
+@main_routes.route('/_add_numbers')
+def add_numbers():
+    a = request.args.get('a', 0, type=int)
+    b = request.args.get('b', 0, type=int)
+
+    return jsonify(result=a + b)

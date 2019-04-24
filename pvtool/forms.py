@@ -46,6 +46,13 @@ class MeasurementForm(RegistrationForm):
     mess_reihe = StringField('Messreihe')
     wetter = StringField('Wetter')
     erfasser = StringField('Erfasser')
-    modellnummer = SelectField('Modellnummer')
-    hersteller = SelectField('Hersteller')
+    pv_modul = SelectField('PV Modul')
     messungen = FileField(validators=[FileRequired()])
+
+
+class PlotterForm(RegistrationForm):
+    pv_modul = SelectField('PV Modul')
+    datum = SelectField('Datum')
+    mess_reihe = SelectField('Messreihe')
+    stc_temperatur = FloatField('STC-Temperatur[°C]')
+    stc_einstrahlung = FloatField('STC-Einstrahlung[W/m^2]')

@@ -28,6 +28,7 @@
     </tbody>
 </table>
 
-<a href="{{ url_for('measurement.measurements') }}" class="btn btn-primary">Alle PV-Module anzeigen</a>
+<a href="{{ url_for('measurement.measurements') }}" class="btn btn-primary">Alle Messungen anzeigen</a>
 <a href="{{ url_for('measurement.remove_measurement', id=measurement.id)}}" class="btn btn-danger">Messung entfernen</a>
+<a href="{{ url_for('data.data', id=measurement.id)}}" class="btn btn-info">Fancy plot</a>
 {% endblock %}

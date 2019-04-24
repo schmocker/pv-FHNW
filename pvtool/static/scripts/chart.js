@@ -1,7 +1,7 @@
 $(function () {
     let ctx = document.getElementById('myChart').getContext('2d');
     let scatterChart = new Chart(ctx, {
-        type: 'scatter',
+        type: 'bubble',
         data: chart_data,
         options: {
             scales: {
@@ -62,6 +62,7 @@ $(function () {
                 // bodyFontSize: 14,
                 // displayColors: false
             }
-        }
+        },
+        showLine: true
     });
 });

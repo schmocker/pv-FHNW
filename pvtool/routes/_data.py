@@ -57,19 +57,62 @@ def template():
 
 @data_routes.route('/_query_results')
 def query_results():
-    model = request.args.get('model', 0, type=str)
-    date = request.args.get('date', 0, type=str)
-    meas_series = request.args.get('meas_series', 0, type=str)
+
+    model = request.args.get('model', type=str)
+    date = request.args.get('date', type=str)
+    meas_series = request.args.get('meas_series', type=str)
     query = {}
-    if model is not 0:
+    if model is not None:
         query["model"] = model
-    if date is not 0:
+    if date is not None:
         query["date"] = date
-    if meas_series is not 0:
+    if meas_series is not None:
         query["meas_series"] = meas_series
 
+    queried_measurements = Measurement.query.filter_by(**query).all()
+
+    results = []
+    for meas in queried_measurements:
+        meas = meas.__dict__
+        meas.pop("_sa_instance_state")
+        results.append(meas)
+
+    return jsonify(results)
+
+
+@data_routes.route('/_query_data')
+def query_data():
+    meas_series = request.args.get('measurement_id', type=str)
+
+    query = {}
+    if meas_series is not None:
+        query["measurement_id"] = meas_series
+
+    queried_measurements = MeasurementValues.query.filter_by(**query).all()
+
+    results = []
+    for meas in queried_measurements:
+        meas = meas.__dict__
+        meas.pop("_sa_instance_state")
+        results.append(meas)
+
+    return jsonify(results)
+
+@data_routes.route('/_query_modules')
+def query_modules():
+    """Query database with model and manufacturer to receive JSON with corresponding modules
+       Syntax: ROOT_DOMAIN/_query_modules?model=modelname&manufacturer=manufacturer_name
+    """
+    model = request.args.get('model', type=str)
+    manufacturer = request.args.get('manufacturer', type=str)
+    query = {}
+
+    if model is not None:
+        query["model"] = model
+    if manufacturer is not None:
+        query["manufacturer"] = manufacturer
+
     chosen_module = PvModule.query.filter_by(**query).all()
-    queried_measurements = Measurement.query.filter_by(pv_module_id=1).all()
 
     results = []
     for meas in chosen_module:

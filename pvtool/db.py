@@ -9,21 +9,13 @@ import sqlalchemy
 import pandas as pd
 import xlsxwriter
 from io import BytesIO
+import json
+from sqlalchemy.orm.attributes import QueryableAttribute
 
 db = SQLAlchemy()
 
 ureg = pint.UnitRegistry()
 ureg.define(UnitDefinition('percent', 'pct', (), ScaleConverter(1 / 100.0)))
-
-
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(
-            current_app.config['CONFIG'],
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.db.row_factory
-    return g.db
 
 
 class Base:
@@ -327,3 +319,4 @@ class FlasherData(db.Model, Base):
     @property
     def ff_f(self):
         return self.get_value_with_unit('_ff_f')
+

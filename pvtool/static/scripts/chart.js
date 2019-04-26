@@ -66,3 +66,18 @@ $(function () {
         showLine: true
     });
 });
+function test_change(word){
+    console.log(word);
+    let select_word = document.getElementById(word)
+
+    $.getJSON($SCRIPT_ROOT + '/_query_results',
+    {
+    date:"test",
+    meas_series:"testy"
+    },
+        function(json){
+            console.log("Success");
+            console.log(json[1]);
+    });
+
+}

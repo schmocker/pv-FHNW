@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, abort, request, redirect, flash, send_file
+from flask import Blueprint, render_template, request, send_file, jsonify
 import numpy as np
 import json
 
@@ -30,7 +30,7 @@ def data():
                                     Measurement.query.distinct(Measurement.measurement_series)
                                     .group_by(Measurement.measurement_series)]
 
-    data = MeasurementValues.query.filter(MeasurementValues.measurement_id==meas_id)
+    data = MeasurementValues.query.filter(MeasurementValues.measurement_id == meas_id)
 
     data_U_I = [{'x': d.U_module.magnitude, 'y': d.I_module.magnitude} for d in data]
     data_U_P = [{'x': d.U_module.magnitude, 'y': d.P_module.magnitude} for d in data]
@@ -53,3 +53,28 @@ def data():
 def template():
     data = MeasurementValues.get_xlsx_template()
     return send_file(data, attachment_filename="template.xlsx", as_attachment=True)
+
+
+@data_routes.route('/_query_results')
+def query_results():
+    model = request.args.get('model', 0, type=str)
+    date = request.args.get('date', 0, type=str)
+    meas_series = request.args.get('meas_series', 0, type=str)
+    query = {}
+    if model is not 0:
+        query["model"] = model
+    if date is not 0:
+        query["date"] = date
+    if meas_series is not 0:
+        query["meas_series"] = meas_series
+
+    chosen_module = PvModule.query.filter_by(**query).all()
+    queried_measurements = Measurement.query.filter_by(pv_module_id=1).all()
+
+    results = []
+    for meas in chosen_module:
+        meas = meas.__dict__
+        meas.pop("_sa_instance_state")
+        results.append(meas)
+
+    return jsonify(results)

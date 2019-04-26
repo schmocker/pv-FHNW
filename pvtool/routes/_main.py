@@ -26,3 +26,8 @@ def add_numbers():
     b = request.args.get('b', 0, type=int)
 
     return jsonify(result=a + b)
+
+
+@main_routes.route('/test')
+def test():
+    return render_template('test.html')

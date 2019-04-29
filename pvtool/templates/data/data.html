@@ -7,13 +7,13 @@
         <div class="row">
             <form class="col-4">
                 <div class="form-group">
-                    {{ form.pv_modul.label }} {{ form.pv_modul(**{"onchange":"test_change('module')","class":"form-control"}) }}
+                    {{ form.pv_modul.label }} {{ form.pv_modul(**{"onchange":"update_chart()","class":"form-control"}) }}
                 </div>
                 <div class="form-group">
-                    {{ form.datum.label }} {{ form.datum(**{"onchange":"test_change('date')","class":"form-control"}) }}
+                    {{ form.datum.label }} {{ form.datum(**{"onchange":"update_chart()","class":"form-control"}) }}
                 </div>
                 <div class="form-group">
-                    {{ form.mess_reihe.label }} {{ form.mess_reihe(**{"onchange":"test_change('meas')","class":"form-control"}) }}
+                    {{ form.mess_reihe.label }} {{ form.mess_reihe(**{"onchange":"update_chart()","class":"form-control"}) }}
                 </div>
                 <div class="row">
                     <div class="col">

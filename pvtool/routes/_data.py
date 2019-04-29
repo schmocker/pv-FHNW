@@ -17,7 +17,6 @@ def data():
                                   Measurement.query.distinct(Measurement.pv_module_id)
                                   .group_by(Measurement.pv_module_id)]
     # chosen_module = Measurement.query.filter(Measurement.pv_module_id==plot_form.pv_modul.data[0]).first().pv_module
-    print("IMPORTANT",plot_form.pv_modul.data)
     plot_form.datum.choices = [(measurement.id,
                                 measurement.date)
                                for measurement in
@@ -38,13 +37,13 @@ def data():
                                 'xAxisID': 'ax_U',
                                 'yAxisID': 'ax_I',
                                 'data':    data_U_I,
-                                'borderColor':  '[rgba(8,8,251,1)]'},
+                                },
                                {'type': 'line',
                                 'label':   'P',
                                 'xAxisID': 'ax_U',
                                 'yAxisID': 'ax_P',
-                                'data':    data_U_P,
-                                'borderColor': '[rgba(255,99,132,0.2)]'}
+                                'data':    data_U_P
+                                }
                                ]}
     return render_template('data/data.html', data=data, chart_data=chart_data, form=plot_form)
 
@@ -57,24 +56,30 @@ def template():
 
 @data_routes.route('/_query_results')
 def query_results():
-
+    """Returns module which was queried and its u_i and u_p values for plot"""
     model = request.args.get('model', type=str)
     date = request.args.get('date', type=str)
-    meas_series = request.args.get('meas_series', type=str)
+    meas_series = request.args.get('measurement_series', type=str)
     query = {}
     if model is not None:
-        query["model"] = model
+        query['model'] = model
     if date is not None:
-        query["date"] = date
+        query['date'] = date
     if meas_series is not None:
-        query["meas_series"] = meas_series
+        query['measurement_series'] = meas_series
 
     queried_measurements = Measurement.query.filter_by(**query).all()
 
     results = []
+
     for meas in queried_measurements:
         meas = meas.__dict__
-        meas.pop("_sa_instance_state")
+        measurement_values = MeasurementValues.query.filter_by(measurement_id=meas['id']).all()
+
+        meas['data_u_i'] = [{'x': d.U_module.magnitude, 'y': d.I_module.magnitude} for d in measurement_values]
+        meas['data_u_p'] = [{'x': d.U_module.magnitude, 'y': d.P_module.magnitude} for d in measurement_values]
+        meas.pop('pv_module')
+        meas.pop('_sa_instance_state')
         results.append(meas)
 
     return jsonify(results)
@@ -86,17 +91,34 @@ def query_data():
 
     query = {}
     if meas_series is not None:
-        query["measurement_id"] = meas_series
+        query['measurement_id'] = meas_series
 
     queried_measurements = MeasurementValues.query.filter_by(**query).all()
 
     results = []
     for meas in queried_measurements:
         meas = meas.__dict__
-        meas.pop("_sa_instance_state")
+        meas.pop('_sa_instance_state')
         results.append(meas)
 
     return jsonify(results)
+
+
+@data_routes.route('/_query_data_u_i_u_p')
+def query_data_u_i_u_p():
+    meas_series = request.args.get('measurement_id', type=str)
+
+    query = {}
+    if meas_series is not None:
+        query["measurement_id"] = meas_series
+
+    queried_measurements = MeasurementValues.query.filter_by(**query).all()
+
+    data_U_I = [{'x': d.U_module.magnitude, 'y': d.I_module.magnitude} for d in queried_measurements]
+    data_U_P = [{'x': d.U_module.magnitude, 'y': d.P_module.magnitude} for d in queried_measurements]
+
+    return jsonify([data_U_I, data_U_P])
+
 
 @data_routes.route('/_query_modules')
 def query_modules():

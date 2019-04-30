@@ -11,7 +11,7 @@ data_routes = Blueprint('data', __name__, template_folder='templates')
 def data():
     meas_id = request.args.get('id', type=int)
     plot_form = PlotterForm()
-    plot_form.pv_modul.choices = [(measurement.id,
+    plot_form.pv_modul.choices = [(measurement.pv_module_id,
                                    str(measurement.pv_module.manufacturer) + ' ' + str(measurement.pv_module.model))
                                   for measurement in
                                   Measurement.query.distinct(Measurement.pv_module_id)
@@ -57,12 +57,15 @@ def template():
 @data_routes.route('/_query_results')
 def query_results():
     """Returns module which was queried and its u_i and u_p values for plot"""
-    model = request.args.get('model', type=str)
+
+    model_id = request.args.get('pv_module_id', type=str)
     date = request.args.get('date', type=str)
     meas_series = request.args.get('measurement_series', type=str)
+
     query = {}
-    if model is not None:
-        query['model'] = model
+
+    if model_id is not None:
+        query['pv_module_id'] = model_id
     if date is not None:
         query['date'] = date
     if meas_series is not None:

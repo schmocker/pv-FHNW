@@ -1,34 +1,6 @@
 $(function(){
-    update_chart();
-});
-function update_chart() {
     let ctx = document.getElementById('myChart').getContext('2d');
-
-    chosen_values = getArgumentsFromDropdown();
-
-    $.getJSON($SCRIPT_ROOT + '/_query_results',
-        {
-        date: chosen_values.date,
-        measurement_series: chosen_values.meas_series
-        },
-            function(json){
-                let data_U_P = json[0]['data_u_p']
-                let data_U_I = json[0]['data_u_i']
-
-                let chart_data = {'datasets': [{'label':   'U',
-                                'xAxisID': 'ax_U',
-                                'yAxisID': 'ax_I',
-                                'data':    data_U_I,
-                                'borderColor':  '[rgba(8,8,251,1)]'},
-                               {'type': 'line',
-                                'label':   'P',
-                                'xAxisID': 'ax_U',
-                                'yAxisID': 'ax_P',
-                                'data':    data_U_P,
-                                'borderColor': '[rgba(255,99,132,0.2)]'}
-                               ]};
-
-                let scatterChart = new Chart(ctx, {
+    let scatterChart = new Chart(ctx, {
                     type: 'bubble',
                     data: chart_data,
                     options: {
@@ -93,9 +65,57 @@ function update_chart() {
                     },
                     showLine: true
                 });
+
+    $(document).ready(function() {
+        $('#datum').change(function(){
+            update_chart(scatterChart);
+        });
+
+        $('#pv_modul').change(function(){
+            update_chart(scatterChart);
+        });
+
+        $('#mess_reihe').change(function(){
+            update_chart(scatterChart);
+        });
+    });
+});
+
+function update_chart(chart) {
+    chosen_values = getArgumentsFromSelectFields();
+    console.log(chosen_values);
+
+    $.getJSON('/_query_results',
+        {
+        date: chosen_values.date,
+        measurement_series: chosen_values.meas_series,
+        pv_module_id: chosen_values.model_id
+        },
+            function(json){
+                console.log(json);
+                let data_U_P = json[0]['data_u_p']
+                let data_U_I = json[0]['data_u_i']
+
+                let chart_data = {'datasets':   [{'label':   'U',
+                                                'xAxisID': 'ax_U',
+                                                'yAxisID': 'ax_I',
+                                                'data':    data_U_I,
+                                                'borderColor': 'rgba(75, 192, 192, 1)',},
+                                               {'type': 'line',
+                                                'label':   'P',
+                                                'xAxisID': 'ax_U',
+                                                'yAxisID': 'ax_P',
+                                                'data':    data_U_P,
+                                                'borderColor': 'rgba(153, 102, 255, 1)'}]
+                                 };
+                chart.data = chart_data;
+                chart.update();
+        })
+        .fail(function() {
+            console.log('error');
         });
 };
-function getArgumentsFromDropdown(){
+function getArgumentsFromSelectFields(){
     let a = document.getElementById('mess_reihe')
     let chosen_meas_series = a.options[a.selectedIndex].text
 
@@ -103,12 +123,12 @@ function getArgumentsFromDropdown(){
     let chosen_date = b.options[b.selectedIndex].text
 
     let c = document.getElementById('pv_modul')
-    let chosen_model = c.options[c.selectedIndex].text
+    let chosen_model_id = c.options[c.selectedIndex].value
 
     return {
         meas_series : chosen_meas_series,
         date : chosen_date,
-        model : chosen_model,
+        model_id : chosen_model_id,
     }
 }
 function test_change(word){
@@ -125,4 +145,10 @@ function test_change(word){
             console.log(json[1]);
     });
 
+}
+
+function test_chart(chart)
+{
+    chart.title = 'Awesome change';
+    chart.update();
 }

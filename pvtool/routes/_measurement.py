@@ -77,7 +77,7 @@ def add_measurement():
             form.pv_modul.choices.append((module.model, str(module.manufacturer) + ' ' + str(module.model)))
 
     if request.method == 'POST':
-        chosen_module = db.session.query(PvModule).filter(PvModule.model == form.pv_modul.data[1]).first()
+        chosen_module = db.session.query(PvModule).filter(PvModule.model == form.pv_modul.data).first()
         # noinspection PyArgumentList
         new_measurement = Measurement(date=form.mess_datum.data,
                                       measurement_series=form.mess_reihe.data,

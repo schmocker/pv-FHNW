@@ -197,7 +197,7 @@ class MeasurementValues(db.Model, Base):
 
     @staticmethod
     def U_2_U_stc(U_messured, G_pan, G_stc, T_pan, T_stc, a_U_oc):
-        return U_messured / (np.log(G_pan) / np.log(G_stc) * (1 + a_U_oc * (T_pan - T_stc)))
+        return U_messured / (np.log(G_pan) / (np.log(G_stc) * (1 + a_U_oc * (T_pan - T_stc))))
 
     @staticmethod
     def I_2_I_stc(I_messured, G_pan, G_stc, T_pan, T_stc, a_I_sc):
@@ -274,6 +274,32 @@ class ManufacturerData(db.Model, Base):
     @property
     def a_U_oc(self):
         return self.get_value_with_unit('_a_U_oc')
+
+    @staticmethod
+    def U_2_U_stc(U_messured, G_pan, G_stc, T_pan, T_stc, a_U_oc):
+        return U_messured * (np.log(G_stc) / (np.log(G_pan) * (1 + a_U_oc * (T_pan - T_stc))))
+
+    @staticmethod
+    def I_2_I_stc(I_messured, G_pan, G_stc, T_pan, T_stc, a_I_sc):
+        return I_messured * (G_stc / (G_pan * (1 + a_I_sc * (T_pan - T_stc))))
+
+    def get_stc_values(self, stc_temp, stc_rad):
+        stc_temp = float(stc_temp)
+        stc_rad = float(stc_rad)
+        return {
+            '_U_mpp_m' : self.U_2_U_stc(self._U_mpp_m*ureg.V, stc_rad,
+                                        1000, stc_temp*ureg.kelvin, 25*ureg.kelvin, self.a_U_oc).magnitude,
+            '_I_mpp_m' : self.I_2_I_stc(self._I_mpp_m*ureg.A, stc_rad,
+                                        1000, stc_temp*ureg.kelvin, 25*ureg.kelvin, self.a_I_sc).magnitude,
+            '_U_oc_m' : self.U_2_U_stc(self._U_oc_m*ureg.V, stc_rad,
+                                       1000, stc_temp*ureg.kelvin, 25*ureg.kelvin, self.a_U_oc).magnitude,
+            '_I_sc_m' : self.I_2_I_stc(self._I_sc_m*ureg.A, stc_rad,
+                                       1000, stc_temp*ureg.kelvin, 25*ureg.kelvin, self.a_I_sc).magnitude,
+            '_a_U_oc' : self.U_2_U_stc(self._a_U_oc, stc_rad,
+                                       1000, stc_temp*ureg.kelvin, 25*ureg.kelvin, self.a_U_oc).magnitude,
+            '_a_I_sc' : self.U_2_U_stc(self._a_I_sc, stc_rad,
+                                       1000, stc_temp*ureg.kelvin, 25*ureg.kelvin, self.a_I_sc).magnitude,
+        }
 
 
 class FlasherData(db.Model, Base):

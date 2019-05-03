@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, send_file, jsonify
 import numpy as np
 import json
 
-from ..db import Measurement, MeasurementValues, PvModule
+from ..db import Measurement, MeasurementValues, PvModule, FlasherData, ManufacturerData
 from ..forms import PlotterForm
 data_routes = Blueprint('data', __name__, template_folder='templates')
 
@@ -43,7 +43,7 @@ def data():
                                 'xAxisID': 'ax_U',
                                 'yAxisID': 'ax_P',
                                 'data':    data_U_P
-                                }
+                                },
                                ]}
     return render_template('data/data.html', data=data, chart_data=chart_data, form=plot_form)
 
@@ -56,36 +56,53 @@ def template():
 
 @data_routes.route('/_query_results')
 def query_results():
-    """Returns module which was queried and its u_i and u_p values for plot"""
+    """Returns module which was queried and its u_i and u_p values for plot and flasher, manufacturer
+    data of corresponding module"""
 
     model_id = request.args.get('pv_module_id', type=str)
     date = request.args.get('date', type=str)
     meas_series = request.args.get('measurement_series', type=str)
+    stc_temp = request.args.get('stc_temp', type=str)
+    stc_rad = request.args.get('stc_rad', type=str)
 
     query = {}
 
-    if model_id is not None:
+    if model_id:
         query['pv_module_id'] = model_id
-    if date is not None:
+    if date:
         query['date'] = date
-    if meas_series is not None:
+    if meas_series:
         query['measurement_series'] = meas_series
 
-    queried_measurements = Measurement.query.filter_by(**query).all()
+    meas = Measurement.query.filter_by(**query).first()
 
-    results = []
+    meas = meas.__dict__
+    measurement_values = MeasurementValues.query.filter_by(measurement_id=meas['id']).all()
 
-    for meas in queried_measurements:
-        meas = meas.__dict__
-        measurement_values = MeasurementValues.query.filter_by(measurement_id=meas['id']).all()
+    flasher_data = FlasherData.query.filter_by(pv_module_id=meas['pv_module_id']).first()
+    manufacturer_data = ManufacturerData.query.filter_by(pv_module_id=meas['pv_module_id']).first()
 
-        meas['data_u_i'] = [{'x': d.U_module.magnitude, 'y': d.I_module.magnitude} for d in measurement_values]
-        meas['data_u_p'] = [{'x': d.U_module.magnitude, 'y': d.P_module.magnitude} for d in measurement_values]
-        meas.pop('pv_module')
-        meas.pop('_sa_instance_state')
-        results.append(meas)
+    if stc_temp and stc_rad:
+        meas['manufacturer_data'] = manufacturer_data.get_stc_values(stc_rad, stc_temp)
+        manufacturer_data = manufacturer_data.__dict__
+        manufacturer_data.pop("_sa_instance_state")
+        meas['manufacturer_data']['_ff_m'] = manufacturer_data['_ff_m']
+        meas['manufacturer_data']['id'] = manufacturer_data['id']
+        meas['manufacturer_data']['pv_module_id'] = manufacturer_data['pv_module_id']
+    else:
+        manufacturer_data = manufacturer_data.__dict__
+        manufacturer_data.pop("_sa_instance_state")
+        meas['manufacturer_data'] = manufacturer_data
 
-    return jsonify(results)
+    flasher_data = flasher_data.__dict__
+    flasher_data.pop("_sa_instance_state")
+    meas['flasher_data'] = flasher_data
+
+    meas['data_u_i'] = [{'x': d.U_module.magnitude, 'y': d.I_module.magnitude} for d in measurement_values]
+    meas['data_u_p'] = [{'x': d.U_module.magnitude, 'y': d.P_module.magnitude} for d in measurement_values]
+    meas.pop('_sa_instance_state')
+
+    return jsonify(meas)
 
 
 @data_routes.route('/_query_data')
@@ -146,3 +163,28 @@ def query_modules():
         results.append(meas)
 
     return jsonify(results)
+
+
+@data_routes.route('/_query_module_data')
+def query_module_data():
+    """Query db with module_id to obtain corresponding flasher and manufacturer data
+    """
+    module_id = request.args.get('pv_module_id', type=str)
+    query = {}
+
+    if module_id is not None:
+        query["id"] = module_id
+
+    flasher_data = FlasherData.query.filter_by(**query).first()
+    manufacturer_data = ManufacturerData.query.filter_by(**query).first()
+
+    flasher_data = flasher_data.__dict__
+    flasher_data.pop("_sa_instance_state")
+
+    manufacturer_data = manufacturer_data.__dict__
+    manufacturer_data.pop("_sa_instance_state")
+
+    result = {'flasher_data': flasher_data,
+              'manufacturer_data': manufacturer_data
+              }
+    return jsonify(result)

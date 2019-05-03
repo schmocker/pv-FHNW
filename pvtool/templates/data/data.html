@@ -15,51 +15,50 @@
                 <div class="form-group">
                     {{ form.mess_reihe.label }} {{ form.mess_reihe(**{"class":"form-control"}) }}
                 </div>
-                <div class="row">
-                    <div class="col">
-                         <label for="exampleFormControlInput1">Temperatur[°C]</label>
-                        <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="25">
-                    </div>
-                    <div class="col">
-                        <label for="exampleFormControlInput1">Einstrahlung[W/m^2]</label>
-                        <input type="email" class="form-control" id="exampleFormControlInput2" placeholder="1000">
-                    </div>
-                </div>
+<!--                <div class="row">-->
+<!--                    <div class="col">-->
+<!--                         <label for="stc_temp">Temperatur[°C]</label>-->
+<!--                        <input type="email" class="form-control" id="stc_temp" placeholder="25">-->
+<!--                    </div>-->
+<!--                    <div class="col">-->
+<!--                        <label for="stc_rad">Einstrahlung[W/m^2]</label>-->
+<!--                        <input type="email" class="form-control" id="stc_rad" placeholder="1000">-->
+<!--                    </div>-->
+<!--                </div>-->
 
             </form>
             <canvas id="myChart" class="col-8"></canvas>
         </div>
         <div class="row">
             <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-        Messwerte anzeigen
-        </button>
+            Messwerte anzeigen
+            </button>
             <table class="table table-bordered collapse" id="collapseExample">
-            <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Module</th>
-                <th scope="col">Date</th>
-                <th scope="col">Messreihe</th>
-                <th scope="col">Wetter</th>
-                <th scope="col">Modulspannung [V]</th>
-                <th scope="col">Modulstrom [A]</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for d in data %}
-                <tr>
-                    <th scope="row">{{ d.id }}</th>
-                    <td>{{ d.measurement.pv_module.model }}</td>
-                    <td>{{ d.measurement.date }}</td>
-                    <td>{{ d.measurement.measurement_series }}</td>
-                    <td>{{ d.measurement.weather }}</td>
-                    <td class="text-right">{{ d.U_module }}</td>
-                    <td class="text-right">{{ d.I_module }}</td>
-                </tr>
-
-            {% endfor %}
-            </tbody>
-        </table>
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Module</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Messreihe</th>
+                        <th scope="col">Wetter</th>
+                        <th scope="col">Modulspannung [V]</th>
+                        <th scope="col">Modulstrom [A]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for d in data %}
+                    <tr>
+                        <th scope="row">{{ d.id }}</th>
+                        <td>{{ d.measurement.pv_module.model }}</td>
+                        <td>{{ d.measurement.date }}</td>
+                        <td>{{ d.measurement.measurement_series }}</td>
+                        <td>{{ d.measurement.weather }}</td>
+                        <td class="text-right">{{ d.U_module }}</td>
+                        <td class="text-right">{{ d.I_module }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
         <script>
             let chart_data = {{ chart_data | tojson }};

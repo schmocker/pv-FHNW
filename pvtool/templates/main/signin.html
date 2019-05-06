@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% from '_formhelpers.html' import render_field %}
+{% block content %}
+
+    <h1>Anmelden</h1>
+    <form action="" method="post" novalidate enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        {{ render_field(form.user_name) }}
+        {{ render_field(form.password) }}
+        <p> {{ form.submit() }}</p>
+    </form>
+
+
+{% endblock %}

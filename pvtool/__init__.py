@@ -1,8 +1,10 @@
 from flask import Flask
 from flask_navigation import Navigation
+from flask_bcrypt import Bcrypt
 from pvtool._config import Config, TestingConfig
 from pvtool.db import db, PvModule
 from .routes import main_routes, pv_modules_routes, measurement_routes, page_not_found, internal_server_error, data_routes
+from .users import login_manager, bcrypt, User
 
 
 def create_app(config):
@@ -17,6 +19,17 @@ def create_app(config):
     @app.before_first_request
     def create_db():
         db.create_all()
+
+    login_manager.init_app(app)
+    login_manager.login_view = 'main.signin'
+    login_manager.login_message = 'Bitte melden Sie sich an um diese Seite zu sehen.'
+    login_manager.login_message_category = 'info'
+
+    @login_manager.user_loader
+    def load_user(userid):
+        return User.query.filter(User.id == userid).first()
+
+    bcrypt.init_app(app)
 
     # navigation
     nav = Navigation(app)

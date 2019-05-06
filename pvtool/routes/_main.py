@@ -19,6 +19,7 @@ def internal_server_error(e):
     flash(e.description, 'danger')
     return render_template('main/500.html'), 500, 'hallo'
 
+
 @main_routes.route('/test')
 def test():
     return render_template('test.html')

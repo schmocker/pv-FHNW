@@ -100,6 +100,10 @@ def query_results():
 
     meas['data_u_i'] = [{'x': d.U_module.magnitude, 'y': d.I_module.magnitude} for d in measurement_values]
     meas['data_u_p'] = [{'x': d.U_module.magnitude, 'y': d.P_module.magnitude} for d in measurement_values]
+
+    meas['data_u_i_stc'] = [{'x': d.U_module_stc.magnitude, 'y': d.I_module_stc.magnitude} for d in measurement_values]
+    meas['data_u_p_stc'] = [{'x': d.U_module_stc.magnitude, 'y': d.P_module_stc.magnitude} for d in measurement_values]
+
     meas.pop('_sa_instance_state')
 
     return jsonify(meas)

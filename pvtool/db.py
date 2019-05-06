@@ -151,41 +151,41 @@ class MeasurementValues(db.Model, Base):
 
     @property
     def T_amb(self):
-        return self.U_T_amb * 100
+        return self._U_T_amb * 100
 
     @property
     def T_pan(self):
-        return self.U_T_pan * 100
+        return self._U_T_pan * 100
 
     @property
     def G_hor(self):
-        return (self.U_G_hor - 2) * 100
+        return (self._U_G_hor - 2) * 100
 
     @property
     def G_pan(self):
-        return (self.U_G_pan - 2) * 100
+        return (self._U_G_pan - 2) * 100
 
     @property
     def G_ref(self):
-        return self.U_G_ref * 130
+        return self._U_G_ref * 130
 
     @property
     def I_module(self):
-        return (self.U_shunt / self.measurement.pv_module.R_shunt).to(ureg.A)
+        return ((self._U_shunt * ureg.V) / self.measurement.pv_module.R_shunt).to(ureg.A)
 
     @property
     def U_module_stc(self):
         return self.U_2_U_stc(U_messured=self.U_module,
                               G_pan=self.G_pan, G_stc=1000,
                               T_pan=self.T_pan, T_stc=25,
-                              a_U_oc=self.pv_module.a_U_oc)
+                              a_U_oc=self.measurement.pv_module.manufacturer_data.a_U_oc)
 
     @property
     def I_module_stc(self):
         return self.I_2_I_stc(I_messured=self.I_module,
                               G_pan=self.G_pan, G_stc=1000,
                               T_pan=self.T_pan, T_stc=25,
-                              a_I_sc=self.pv_module.a_I_sc)
+                              a_I_sc=self.measurement.pv_module.manufacturer_data.a_I_sc)
 
     @property
     def P_module(self):
@@ -197,11 +197,11 @@ class MeasurementValues(db.Model, Base):
 
     @staticmethod
     def U_2_U_stc(U_messured, G_pan, G_stc, T_pan, T_stc, a_U_oc):
-        return U_messured / (np.log(G_pan) / (np.log(G_stc) * (1 + a_U_oc * (T_pan - T_stc))))
+        return U_messured / (np.log(G_pan) / (np.log(G_stc) * (1 + a_U_oc * (T_pan - T_stc)*ureg.K)))
 
     @staticmethod
     def I_2_I_stc(I_messured, G_pan, G_stc, T_pan, T_stc, a_I_sc):
-        return I_messured / (G_pan / G_stc * (1 + a_I_sc * (T_pan - T_stc)))
+        return I_messured / (G_pan / G_stc * (1 + a_I_sc * (T_pan - T_stc)*ureg.K))
 
 
 class PvModule(db.Model, Base):

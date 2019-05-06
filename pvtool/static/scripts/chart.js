@@ -5,6 +5,7 @@ $(function(){
                     type: 'line',
                     data: chart_data,
                     options: {
+                        legend: {position: 'right'},
                         scales: {
                             xAxes: [{
                                 type: 'linear',
@@ -104,7 +105,10 @@ function update_chart(chart) {
                 let data_U_P = json['data_u_p']
                 let data_U_I = json['data_u_i']
 
-                let chart_data = {datasets: [{label:   'Messung U in STC',
+                let data_U_P_STC = json['data_u_p_stc']
+                let data_U_I_STC = json['data_u_i_stc']
+
+                let chart_data = {datasets: [{label:   'Messung U',
                                                 xAxisID: 'ax_U',
                                                 yAxisID: 'ax_I',
                                                 data:    data_U_I,
@@ -113,11 +117,27 @@ function update_chart(chart) {
                                                 type: 'bubble',
                                                 },
                                                {
-                                                label:   'Messung P in STC',
+                                                label:   'Messung P',
                                                 xAxisID: 'ax_U',
                                                 yAxisID: 'ax_P',
                                                 data:    data_U_P,
                                                 borderColor: 'rgba(153, 102, 255, 1)',
+                                                type: 'bubble',
+                                                },
+                                                {label:   'Messung U in STC',
+                                                xAxisID: 'ax_U',
+                                                yAxisID: 'ax_I',
+                                                data:    data_U_I_STC,
+                                                borderColor: 'rgba(7, 19, 192, 1)',
+                                                options: '{elements: {point:{radius: 3}},}',
+                                                type: 'bubble',
+                                                },
+                                               {
+                                                label:   'Messung P in STC',
+                                                xAxisID: 'ax_U',
+                                                yAxisID: 'ax_P',
+                                                data:    data_U_P_STC,
+                                                borderColor: 'rgba(15, 12, 25, 1)',
                                                 type: 'bubble',
                                                 },
 
@@ -179,7 +199,7 @@ function update_chart(chart) {
 
                         var increment = (max_volt-min_volt)/100;
 
-                        for(var i = 2; i <= 5; i++)
+                        for(var i = 4; i <= 7; i++)
                         {
                             var result = [];
                             for( var j = 0; j<100; j++)

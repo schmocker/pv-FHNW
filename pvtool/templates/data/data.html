@@ -4,16 +4,18 @@
 
     <h1>Data</h1>
     <div class="container">
-        <div class="row">
-            <form class="col-4">
-                <div class="form-group">
-                    {{ form.pv_modul.label }} {{ form.pv_modul(**{"class":"form-control"}) }}
-                </div>
-                <div class="form-group">
-                    {{ form.datum.label }} {{ form.datum(**{"class":"form-control"}) }}
-                </div>
-                <div class="form-group">
-                    {{ form.mess_reihe.label }} {{ form.mess_reihe(**{"class":"form-control"}) }}
+        <div>
+            <form>
+                <div class="row">
+                    <div class="form-group col">
+                        {{ form.pv_modul.label }} {{ form.pv_modul(**{"class":"form-control"}) }}
+                    </div>
+                    <div class="form-group col">
+                        {{ form.datum.label }} {{ form.datum(**{"class":"form-control"}) }}
+                    </div>
+                    <div class="form-group col">
+                        {{ form.mess_reihe.label }} {{ form.mess_reihe(**{"class":"form-control"}) }}
+                    </div>
                 </div>
 <!--                <div class="row">-->
 <!--                    <div class="col">-->
@@ -27,39 +29,42 @@
 <!--                </div>-->
 
             </form>
-            <canvas id="myChart" class="col-8"></canvas>
         </div>
         <div class="row">
-            <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-            Messwerte anzeigen
-            </button>
-            <table class="table table-bordered collapse" id="collapseExample">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Module</th>
-                        <th scope="col">Date</th>
-                        <th scope="col">Messreihe</th>
-                        <th scope="col">Wetter</th>
-                        <th scope="col">Modulspannung [V]</th>
-                        <th scope="col">Modulstrom [A]</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for d in data %}
-                    <tr>
-                        <th scope="row">{{ d.id }}</th>
-                        <td>{{ d.measurement.pv_module.model }}</td>
-                        <td>{{ d.measurement.date }}</td>
-                        <td>{{ d.measurement.measurement_series }}</td>
-                        <td>{{ d.measurement.weather }}</td>
-                        <td class="text-right">{{ d.U_module }}</td>
-                        <td class="text-right">{{ d.I_module }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+            <canvas id="myChart" class="col-12"></canvas>
         </div>
+
+<!--        <div class="row">-->
+<!--            <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">-->
+<!--            Messwerte anzeigen-->
+<!--            </button>-->
+<!--            <table class="table table-bordered collapse" id="collapseExample">-->
+<!--                <thead>-->
+<!--                    <tr>-->
+<!--                        <th scope="col">#</th>-->
+<!--                        <th scope="col">Module</th>-->
+<!--                        <th scope="col">Date</th>-->
+<!--                        <th scope="col">Messreihe</th>-->
+<!--                        <th scope="col">Wetter</th>-->
+<!--                        <th scope="col">Modulspannung [V]</th>-->
+<!--                        <th scope="col">Modulstrom [A]</th>-->
+<!--                    </tr>-->
+<!--                </thead>-->
+<!--                <tbody>-->
+<!--                {% for d in data %}-->
+<!--                    <tr>-->
+<!--                        <th scope="row">{{ d.id }}</th>-->
+<!--                        <td>{{ d.measurement.pv_module.model }}</td>-->
+<!--                        <td>{{ d.measurement.date }}</td>-->
+<!--                        <td>{{ d.measurement.measurement_series }}</td>-->
+<!--                        <td>{{ d.measurement.weather }}</td>-->
+<!--                        <td class="text-right">{{ d.U_module }}</td>-->
+<!--                        <td class="text-right">{{ d.I_module }}</td>-->
+<!--                    </tr>-->
+<!--                {% endfor %}-->
+<!--                </tbody>-->
+<!--            </table>-->
+<!--        </div>-->
         <script>
             let chart_data = {{ chart_data | tojson }};
         </script>

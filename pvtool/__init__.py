@@ -25,10 +25,10 @@ def create_app(config):
         nav.Item('PV-Module', 'pv.pv_modules'),
         nav.Item('Messungen', 'measurement.measurements'),
         nav.Item('Data', 'data.data'),
-        nav.Item('Home', 'main.home', items=[
-            nav.Item('Home', 'main.home'),
-            nav.Item('Home', 'main.home'),
-        ]),
+        # nav.Item('Home', 'main.home', items=[
+        #     nav.Item('Home', 'main.home'),
+        #     nav.Item('Home', 'main.home'),
+        # ]),
     ])
 
     # routes

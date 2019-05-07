@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import request, flash, render_template, redirect, url_for, request, abort
+from flask import request, flash, render_template, redirect, url_for, request, abort, send_file
 
 import sqlalchemy
 from sqlalchemy.exc import IntegrityError
@@ -10,7 +10,9 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo
 from .routes._main import main_routes, is_safe_url
 from flask_bcrypt import Bcrypt
-
+from .forms import GenerateUsers
+from random import randint
+import xlsxwriter
 
 login_manager = LoginManager()
 bcrypt = Bcrypt()
@@ -95,3 +97,36 @@ def signout():
 
     flash('Erfolgreich abgemeldet', category='success')
     return redirect(url_for('main.home'))
+
+
+def generate_password(year):
+    password = 'pvtool'
+    password += str(randint(1, 10e6))
+    password += '_' + year
+    return password
+
+
+@main_routes.route('/generate_users', methods=['GET', 'POST'])
+def generate_users():
+    """send xlsx file with valid users"""
+
+    form = GenerateUsers()
+
+    if form.validate_on_submit():
+        template_name = 'login_pvtool_' + form.jahr.data + '.xlsx'
+        workbook = xlsxwriter(template_name)
+        worksheet = workbook.add_worksheet()
+
+        for i in range(form.anzahl_benutzer.data):
+            user = 'pv-FHNW' + form.jahr.data + '_' + str(i)
+            password = generate_password(form.jahr.data)
+
+            cell = 'A' + str(i)
+            cell_pw = 'B' + str(i)
+            worksheet.write(cell, user)
+            worksheet.write(cell_pw, password)
+
+        workbook.close()
+        send_file(workbook, attachment_filename=template_name, as_attachment=True)
+
+    return render_template('/main/generate_users.html',form=form)

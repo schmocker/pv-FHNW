@@ -23,6 +23,12 @@ class Config(object):
 
 
 class TestingConfig(Config):
+    ENV = True
+    LOGGING_LEVEL = int(environ.get('LOGGING_LEVEL', default=5))
+    LOGGING_FORMATTER = environ.get('LOGGING_FORMATTER', default='%(levelname)s::%(module)s: %(message)s')
+    SECRET_KEY = environ.get('SECRET_KEY', default='8"79cpvp?xyCBPZV]T8~-m3"*0x>dm88Nm$PV]sW}AMq/Fj4zBa%fGt~Xa>emVw')
+    SQLALCHEMY_TRACK_MODIFICATIONS = environ.get('SQLALCHEMY_TRACK_MODIFICATIONS', default=False) in [True, 'True']
+
     BCRYPT_LOG_ROUNDS = 4
     TESTING = True
     WTF_CSRF_ENABLED = False

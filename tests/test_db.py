@@ -1,8 +1,24 @@
-from pvtool.db import PvModule
+from pvtool.db import PvModule, db
 
 
-def test_pv_module_insert(app):
-    pass
+def test_pv_module_insert(client, init_db):
+    test_pv_module = PvModule(model="TEST",
+                             manufacturer="TEST",
+                             cell_type="TEST",
+                             additional_information="TEST",
+                             price_CHF="-999",
+                             length="-999",
+                             width="-999",
+                             shunt_resistance="-999",
+                             )
+    db.session.add(test_pv_module)
+    db.session.commit()
+
+    query_result = db.session.query(PvModule).filter(PvModule.model == test_pv_module.model).first()
+    assert query_result
+    db.session.query(PvModule).filter(PvModule.model == test_pv_module.model).delete()
+    db.session.commit()
+
     """
     GIVEN a database
     WHEN database is initialized

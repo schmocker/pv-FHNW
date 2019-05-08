@@ -1,12 +1,18 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
-from wtforms import Form, BooleanField, StringField, validators, SelectField, SubmitField, FloatField
+from wtforms import Form, BooleanField, StringField, validators, SelectField, SubmitField, FloatField, IntegerField
 
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', [validators.length(min=3, max=25)])
     accept_rules = BooleanField('Ich habe dieses Formular gewissenhaft ausgefüllt.', [validators.InputRequired()])
     submit = SubmitField('PV-Modul hinzufügen')
+
+
+class GenerateUsers(FlaskForm):
+    jahr = StringField('Jahr', [validators.length(min=4,max=4)])
+    anzahl_benutzer = IntegerField('Anzahl Benutzer', [validators.length(min=1, max=20)])
+    submit = SubmitField('Benutzer generieren')
 
 
 class PvModuleForm(RegistrationForm):

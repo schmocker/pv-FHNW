@@ -1,13 +1,14 @@
 from flask import Blueprint, render_template, request, send_file, jsonify
 import numpy as np
 import json
-
+from flask_login import login_required
 from ..db import Measurement, MeasurementValues, PvModule, FlasherData, ManufacturerData
 from ..forms import PlotterForm
 data_routes = Blueprint('data', __name__, template_folder='templates')
 
 
 @data_routes.route('/data', methods=['GET', 'POST'])
+@login_required
 def data():
     meas_id = request.args.get('id', type=int)
     plot_form = PlotterForm()

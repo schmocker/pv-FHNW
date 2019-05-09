@@ -5,7 +5,7 @@ import pytest
 
 from pvtool import create_app, TestingConfig
 from pvtool.db import db
-from pvtool.users import User
+from pvtool.routes._users import User
 
 @pytest.fixture
 def app():

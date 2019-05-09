@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1>Benutzer</h1>
+<table class="table table-bordered  table-hover">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Benutzername</th>
+        <th scope="col">Daten eingereicht</th>
+        <th scope="col">Einreichedatum</th>
+        <th scope="col">1.Student</th>
+        <th scope="col">2.Student</th>
+        <th scope="col">3.Student</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+    {% set url = url_for('users.user', id=user.id) %}
+    <tr onclick="window.location.href = '{{ url }}';" style="cursor: pointer">
+        <th scope="row">{{ user.id }}</th>
+        <td>{{ user.user_name }}</td>
+        <td>{{ user._password }}</td>
+        <td>{{ user.submission_date }}</td>
+        <td>{{ user.student1 }}</td>
+        <td>{{ user.student2 }}</td>
+        <td>{{ user.student3 }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('users.generate_user') }}" class="btn btn-primary">Benutzer generieren</a>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% from '_formhelpers.html' import render_field %}
+{% block content %}
+
+    <form action="" method="post" novalidate enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="form-group col-4">
+            {{ form.jahr.label }} {{ form.jahr(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form.student1.label }} {{ form.student1(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form.student2.label }} {{ form.student2(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form.student3.label }} {{ form.student3(**{"class":"form-control"}) }}
+        </div>
+        <p class="form-group"> {{ form.submit(**{"class":"btn-primary"}) }}</p>
+    </form>
+
+{% endblock %}

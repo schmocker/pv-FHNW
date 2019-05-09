@@ -19,13 +19,16 @@ ureg.define(UnitDefinition('percent', 'pct', (), ScaleConverter(1 / 100.0)))
 
 
 class Base:
+    """Base class to access values with units"""
     def get_value_with_unit(self, col_name: str):
+        """returns value including pint unit"""
         try:
             return self.get_value(col_name) * self.get_column_unit(col_name)
         except Exception as e:
             raise Exception(f'could not get value with unit for column "{col_name}"\n-> {e}')
 
     def get_value(self, col_name: str):
+        """get the value of the column only, i.e. the data as it is stored"""
         try:
             return getattr(self, col_name)
         except AttributeError as e:
@@ -33,6 +36,7 @@ class Base:
 
     @classmethod
     def get_column_unit(cls, col_name: str):
+        """Return the unit of the column in which data is stored"""
         info = cls.get_column_info(col_name)
         try:
             unit = info['unit']
@@ -50,6 +54,7 @@ class Base:
 
     @classmethod
     def get_column_info(cls, col_name):
+        """return the info part of the column"""
         col = cls.get_column(col_name)
         try:
             return col.info
@@ -58,6 +63,7 @@ class Base:
 
     @classmethod
     def get_column(cls, col_name):
+        """returns the called column"""
         try:
             col = getattr(cls, col_name)
             if type(col) is not sqlalchemy.orm.attributes.InstrumentedAttribute:
@@ -68,11 +74,21 @@ class Base:
 
     @classmethod
     def get_column_names(cls):
+        """returns column names of the corresponding table as a list"""
         return [i for i in cls.__dict__.keys() if
                 type(getattr(cls, i)) is sqlalchemy.orm.attributes.InstrumentedAttribute]
 
 
 class Measurement(db.Model, Base):
+    """Stores a single measurement
+        date:                   the date when the measurement was taken
+        measurement_series:     name of the measurement as given by course
+        weather:                description of the current weather as string
+        producer:               Students who took the measurements
+
+        pv_module_id:           many-to-one relationship to PvModule
+        measurement_values:     one-to-may relationship to MeasurementValues
+    """
     __tablename__ = 'measurement'
 
     id = db.Column(db.Integer, primary_key=True, info={'label': '#'})
@@ -89,6 +105,7 @@ class Measurement(db.Model, Base):
 
 
 class MeasurementValues(db.Model, Base):
+    """Values of one measureement, many-to-one relationship to Measurement"""
     __tablename__ = 'measurement_values'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -205,6 +222,16 @@ class MeasurementValues(db.Model, Base):
 
 
 class PvModule(db.Model, Base):
+    """PV Module used for measurement
+        model:          modelnumber of the cell, does not have to be an int
+        manufacturer:   name of the manufacturer
+        cell_type:      specifies type of cell(e.g. organic)
+
+        manufacturer_data:      one-to-one relationship, STC values of manufacturer
+        flasher_data:           one-to-one relationship as obtained by Flasher measurement
+
+        measurement:            one-to-many relationship to measurements made with the PV module
+    """
     __tablename__ = 'pv_module'
 
     id = db.Column(db.Integer, primary_key=True, info={'label': '#'})
@@ -232,6 +259,7 @@ class PvModule(db.Model, Base):
 
 
 class ManufacturerData(db.Model, Base):
+    """STC as measured by manufacturer"""
     __tablename__ = 'manufacturer_data'
 
     # manufacturer data
@@ -303,6 +331,7 @@ class ManufacturerData(db.Model, Base):
 
 
 class FlasherData(db.Model, Base):
+    """data as flasher measurement"""
     __tablename__ = 'flasher_data'
 
     # flasher data

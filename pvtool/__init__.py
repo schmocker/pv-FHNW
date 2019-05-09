@@ -9,6 +9,11 @@ from .routes._users import login_manager, bcrypt, User
 
 
 def create_app(config):
+    """
+    App factory for Flask app. Setup of database, login, navbar and registering of blueprints
+    :param config:
+    :return: running flask app
+    """
     # create pvtool
     app = Flask('pvtool')
 

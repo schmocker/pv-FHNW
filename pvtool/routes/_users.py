@@ -1,6 +1,5 @@
+"""Implements login function and links users to measurement"""
 from flask import Blueprint, flash, render_template, redirect, url_for, request, abort, send_file, current_app, g
-from flask.cli import with_appcontext
-
 from sqlalchemy.exc import IntegrityError
 from flask_login import LoginManager, login_user, logout_user, UserMixin, current_user
 from ..db import db, get_db, Measurement
@@ -20,6 +19,8 @@ users_routes = Blueprint('users', __name__, template_folder='templates')
 
 
 class User(UserMixin,db.Model):
+    """User class for flask-login and distributing passwords and usernames
+    to students"""
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -61,6 +62,8 @@ class User(UserMixin,db.Model):
 
 @users_routes.route('/register', methods=['GET', 'POST'])
 def register():
+    """LEGACY: register a new user by typing a password twice.
+    TODO: remove in future versions"""
     form = RegisterForm(request.form)
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -78,6 +81,7 @@ def register():
 
 @users_routes.route('/signin', methods=['GET', 'POST'])
 def signin():
+    """Render a login form and sign in the user"""
     if current_user.is_authenticated:
         next = request.args.get('next')
         if not is_safe_url(next):
@@ -104,6 +108,7 @@ def signin():
 
 @users_routes.route('/signout')
 def signout():
+    """Signout the current user."""
     logout_user()
 
     flash('Erfolgreich abgemeldet', category='success')
@@ -170,13 +175,14 @@ def generate_user():
 
 @users_routes.route('/users')
 def users():
+    """Overview as table of all registered users"""
     users = User.query.all()
     return render_template('users/users.html', users=users)
 
 
 @users_routes.route('/user')
 def user():
-    """detailed view for specific user"""
+    """Detailed view for specific user"""
     try:
         user_id = request.args.get('id', type=int)
         if user_id is None:
@@ -193,6 +199,7 @@ def user():
 
 @users_routes.route('/users/remove')
 def remove_user():
+    """Remove user without cascading deletion of inserted measurements"""
     user_id = request.args.get('id', type=int)
     if user_id is not None:
         db.session.query(User).filter(User.id == user_id).delete()

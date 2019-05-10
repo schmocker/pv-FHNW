@@ -1,6 +1,7 @@
+"""Overview of all modules and corresponding upload functions and insertion through forms"""
 import os
 from werkzeug.utils import secure_filename
-from flask import Blueprint, render_template, abort, request, redirect, flash
+from flask import Blueprint, render_template, request, redirect, flash
 
 from ..db import PvModule, FlasherData, ManufacturerData, db
 
@@ -36,6 +37,7 @@ def pv_module():
 
 @pv_modules_routes.route('/pv_modules/add', methods=['GET', 'POST'])
 def add_pv_module():
+    """Add individual module by typing filling out form"""
     form = PvModuleForm()
     if request.method == 'POST':
         new_pv_module = PvModule(model=form.modellnummer.data,
@@ -56,6 +58,7 @@ def add_pv_module():
 
 @pv_modules_routes.route('/pv_modules/add_data', methods=['GET', 'POST'])
 def add_pv_module_data():
+    """Add data to chosen module with form"""
     form_flasher = FlasherDataForm()
     form_manufacturer = ManufacturerDataForm()
 
@@ -90,7 +93,7 @@ def add_pv_module_data():
 
 @pv_modules_routes.route('/pv_modules/add_multiple_modules', methods=['GET','POST'])
 def add_multiple_pv_modules():
-    """Upload csv with complete values"""
+    """Upload csv, xls or xlsx with complete values. Makes life a lot easier."""
     form = PvModuleForm()
     if request.method == 'POST':
         f = form.pv_modul_file.data
@@ -104,6 +107,9 @@ def add_multiple_pv_modules():
 
 @pv_modules_routes.route('/pv_modules/edit', methods=['GET', 'POST'])
 def edit_pv_module():
+    """change values of pvmodule
+    TODO: Fix it to populate files with already inserted values
+    """
     pv_id = request.args.get('id', type=int)
     form = PvModuleForm()
     if request.method == 'POST':
@@ -116,6 +122,7 @@ def edit_pv_module():
 
 @pv_modules_routes.route('/pv_modules/remove')
 def remove_pv_module():
+    """Remove chosen PvModule and its associated measurements"""
     pv_id = request.args.get('id', type=int)
 
     if pv_id is not None:

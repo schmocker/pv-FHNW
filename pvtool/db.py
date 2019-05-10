@@ -6,10 +6,8 @@ import pint
 from pint.converters import ScaleConverter
 from pint.unit import UnitDefinition
 import sqlalchemy
-import pandas as pd
 import xlsxwriter
 from io import BytesIO
-import json
 from sqlalchemy.orm.attributes import QueryableAttribute
 
 db = SQLAlchemy()

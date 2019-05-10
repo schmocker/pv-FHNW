@@ -1,6 +1,5 @@
+"""Visualization of different measurements and API to return measurements as JSON"""
 from flask import Blueprint, render_template, request, send_file, jsonify
-import numpy as np
-import json
 from flask_login import login_required
 from ..db import Measurement, MeasurementValues, PvModule, FlasherData, ManufacturerData
 from ..forms import PlotterForm
@@ -10,6 +9,7 @@ data_routes = Blueprint('data', __name__, template_folder='templates')
 @data_routes.route('/data', methods=['GET', 'POST'])
 @login_required
 def data():
+    """Plot the functions U-I and U-P with buttons to query different measurements"""
     meas_id = request.args.get('id', type=int)
     plot_form = PlotterForm()
     plot_form.pv_modul.choices = [(measurement.pv_module_id,
@@ -51,6 +51,7 @@ def data():
 
 @data_routes.route('/data/template')
 def template():
+    """Send template to user were measurement_values are to be inserted."""
     data = MeasurementValues.get_xlsx_template()
     return send_file(data, attachment_filename="template.xlsx", as_attachment=True)
 
@@ -112,6 +113,7 @@ def query_results():
 
 @data_routes.route('/_query_data')
 def query_data():
+    """API function which returns a measurement as queried by id"""
     meas_series = request.args.get('measurement_id', type=str)
 
     query = {}
@@ -131,6 +133,7 @@ def query_data():
 
 @data_routes.route('/_query_data_u_i_u_p')
 def query_data_u_i_u_p():
+    """get a measurement by id and return its U-I data and U-P data"""
     meas_series = request.args.get('measurement_id', type=str)
 
     query = {}

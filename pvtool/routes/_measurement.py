@@ -1,5 +1,5 @@
+"""Overview of all Measurements and linked functions such as uploading removing and single view of measurement"""
 import os
-
 from werkzeug.utils import secure_filename
 from flask import Blueprint, render_template, request, redirect, flash, g, current_app
 from flask_login import current_user
@@ -12,12 +12,14 @@ measurement_routes = Blueprint('measurement', __name__, template_folder='templat
 
 @measurement_routes.route('/measurements')
 def measurements():
+    """Display all measurements as table with clickable individual measurements"""
     measurements_for_displaying = Measurement.query.all()
     return render_template('measurement/measurements.html', measurements=measurements_for_displaying)
 
 
 @measurement_routes.route('/measurement')
 def measurement():
+    """Display a single measurement with link to removal, plot and returning to all measurements"""
     try:
         meas_id = request.args.get('id', type=int)
         if meas_id is None:
@@ -33,6 +35,7 @@ def measurement():
 
 @measurement_routes.route('/measurement/remove')
 def remove_measurement():
+    """Remove the individual measurement and its corresponding measurement values, does not affect the user"""
     meas_id = request.args.get('id', type=int)
     if meas_id is not None:
         db.session.query(Measurement).filter(Measurement.id == meas_id).delete()
@@ -43,6 +46,9 @@ def remove_measurement():
 
 @measurement_routes.route('/upload', methods=['GET', 'POST'])
 def upload_file():
+    """Legacy function
+    TODO: REMOVE
+    """
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -66,7 +72,7 @@ def upload_file():
 
 @measurement_routes.route('/add_measurement', methods=['GET', 'POST'])
 def add_measurement():
-    """Ugly code"""
+    """Form to add measurement with populated pvmodules field"""
     form = MeasurementForm()
     modules = db.session.query(PvModule).all()
     flash('Logged in as:', )

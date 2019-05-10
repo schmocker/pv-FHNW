@@ -3,12 +3,12 @@
 {% block content %}
 
     <h1>Messreihe hinzufügen</h1>
+    <div>Erfasst von: {{ user.students}}</div>
+    <div>Messreihe: {{ user.meas_series}}</div>
+
     <form action="" method="post" novalidate enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         {{ render_field(form.mess_datum) }}
-        {{ render_field(form.mess_reihe) }}
-        {{ render_field(form.wetter) }}
-        {{ render_field(form.erfasser) }}
         {{ render_field(form.pv_modul) }}
 
         {{ render_field(form.messungen) }}

@@ -1,6 +1,6 @@
 from flask import Flask
+from flask.cli import click
 from flask_navigation import Navigation
-from flask_bcrypt import Bcrypt
 from pvtool._config import Config, TestingConfig
 from pvtool.db import db, PvModule
 from .routes import main_routes, pv_modules_routes, measurement_routes, page_not_found, internal_server_error, \
@@ -17,7 +17,6 @@ def create_app(config):
     # create pvtool
     app = Flask('pvtool')
 
-    # TODO: Update this if other configs are needed
     app.config.from_object(config)
     # database
     db.init_app(app)
@@ -27,7 +26,7 @@ def create_app(config):
         db.create_all()
 
     login_manager.init_app(app)
-    login_manager.login_view = 'main.signin'
+    login_manager.login_view = 'users.signin'
     login_manager.login_message = 'Bitte melden Sie sich an um diese Seite zu sehen.'
     login_manager.login_message_category = 'info'
 
@@ -37,6 +36,22 @@ def create_app(config):
 
     bcrypt.init_app(app)
 
+    @click.command('create_admin')
+    def create_admin():
+        """register an admin user via command"""
+        if len(db.session.query(User).filter(User.rights == 'ADMIN').all()) >= 0:
+            click.echo('There already is an Admin user')
+            return
+        new_user = User('-', '-',
+                        '-', '-')
+        new_user.rights = 'Admin'
+        new_user.user_name = 'admin'
+        new_user._password = 'admin'
+
+        db.session.add(new_user)
+        db.session.commit()
+        click.echo('Created admin user.')
+
     # navigation
     nav = Navigation(app)
     nav.Bar('top', [
@@ -45,10 +60,6 @@ def create_app(config):
         nav.Item('Messungen', 'measurement.measurements'),
         nav.Item('Data', 'data.data'),
         nav.Item('Benutzer', 'users.users')
-        # nav.Item('Home', 'main.home', items=[
-        #     nav.Item('Home', 'main.home'),
-        #     nav.Item('Home', 'main.home'),
-        # ]),
     ])
 
     # routes
@@ -60,5 +71,7 @@ def create_app(config):
 
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(500, internal_server_error)
+
+    app.cli.add_command(create_admin)
 
     return app

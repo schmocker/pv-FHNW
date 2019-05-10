@@ -76,9 +76,6 @@ class FlasherDataForm(BaseForm):
 class MeasurementForm(BaseForm):
     """add a new measurement without login, superfluous in future updates"""
     mess_datum = StringField('Messdatum')
-    mess_reihe = StringField('Messreihe')
-    wetter = StringField('Wetter')
-    erfasser = StringField('Erfasser')
     pv_modul = SelectField('PV Modul')
     messungen = FileField(validators=[FileRequired()])
 

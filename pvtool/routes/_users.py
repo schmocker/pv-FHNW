@@ -1,8 +1,9 @@
-from flask import Blueprint, flash, render_template, redirect, url_for, request, abort, send_file
+from flask import Blueprint, flash, render_template, redirect, url_for, request, abort, send_file, current_app, g
+from flask.cli import with_appcontext
 
 from sqlalchemy.exc import IntegrityError
 from flask_login import LoginManager, login_user, logout_user, UserMixin, current_user
-from ..db import db
+from ..db import db, get_db, Measurement
 from ._main import is_safe_url
 from flask_bcrypt import Bcrypt
 from ..forms import RegisterForm, GenerateUser, LoginForm
@@ -10,6 +11,7 @@ from ..forms import RegisterForm, GenerateUser, LoginForm
 from random import randint
 from io import BytesIO
 import xlsxwriter
+import click
 
 login_manager = LoginManager()
 bcrypt = Bcrypt()
@@ -28,9 +30,11 @@ class User(UserMixin,db.Model):
     student2 = db.Column(db.String)
     student3 = db.Column(db.String)
     submission_date = db.Column(db.String, default='nicht eingereicht')
+    rights = db.Column(db.String, default='student')
 
     def is_correct_password(self, plaintext):
-        return bcrypt.check_password_hash(self._password, plaintext)
+        return self._password == plaintext
+        #return bcrypt.check_password_hash(self._password, plaintext)
 
     def generate_password(self, year):
         password = 'pvtool'
@@ -153,8 +157,8 @@ def generate_user():
         if form.validate_on_submit():
             new_user = User(form.jahr.data, form.student1.data,
                             form.student2.data, form.student3.data)
-            number_of_users = len(User.query.all())
-            new_user.generate_username(number_of_users + 1)
+            number_of_users_in_current_year = len(User.query.filter(User.year == form.jahr.data).all())
+            new_user.generate_username(number_of_users_in_current_year + 1)
             print(new_user.id)
             db.session.add(new_user)
             db.session.commit()
@@ -178,9 +182,10 @@ def user():
         if user_id is None:
             raise Exception(f'no valid id for user')
         user = User.query.get(user_id)
+        measurement = Measurement.query.filter(Measurement.measurement_series == user.user_name).first()
         if user is None:
             raise Exception(f'no user with id {user_id} exists')
-        return render_template('users/user.html', user=user)
+        return render_template('users/user.html', user=user, measurement=measurement)
     except Exception as e:
         flash(str(e), category='danger')
         return redirect(url_for('users.users'))

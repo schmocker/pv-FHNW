@@ -43,5 +43,11 @@
             {% endfor %}
         </ul>
     </div>
+    {% if current_user.is_anonymous %}
+    <a href="{{ url_for('users.signin')}}" class="btn btn-info">Anmelden</a>
+    {% endif %}
+    {% if not current_user.is_anonymous %}
+    <a href="{{ url_for('users.signout')}}" class="btn btn-info">Abmelden</a>
+    {% endif %}
 
 </nav>

@@ -9,21 +9,26 @@
             <div class="col-md-6">
                 <h6>Created by:</h6>
                 <ul>
-                    <li>Tobias Schmocker</li>
-                    <li>Janick "J-Star" Lehmann</li>
                     <li>Marc Gantenbein</li>
                 </ul>
             </div>
-            <div class="col-md-6">
-                <h6>External Links</h6>
+
+        {% if not current_user.is_anonymous %}
+        <div class="col-md-6">
+            <div class="card bg-dark">
+                <h6 class="card-title">Angemeldet als:</h6>
                 <ul>
                     <li>
-                        <a href="https://www.fhnw.ch/de/die-fhnw/hochschulen/ht/institute/institut-fuer-biomasse-und-ressourceneffizienz">
-                            Institut für Biomasse und Ressourceneffizienz</a></li>
-                    <li><a href="https://www.fhnw.ch/de/studium/technik/energie-umwelttechnik">
-                        Energie- und Umwelttechnik</a></li>
+                        <a class="card-text">{{current_user.__dict__['user_name']}}</a>
+                    </li>
+                    <li>
+                        <a class="card-text">{{current_user.__dict__['student1']}}, {{current_user.__dict__['student2']}}, {{current_user.__dict__['student3']}}</a>
+                    </li>
                 </ul>
             </div>
+        </div>
+        {% endif %}
+
         </div>
         <!--Grid row-->
     </div>

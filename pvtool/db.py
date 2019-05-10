@@ -18,6 +18,17 @@ ureg = pint.UnitRegistry()
 ureg.define(UnitDefinition('percent', 'pct', (), ScaleConverter(1 / 100.0)))
 
 
+def get_db():
+    """ probably needed to give context to cli command for creating admin user"""
+    print(current_app.config['SQLALCHEMY_DATABASE_URI'])
+    if 'db' not in g:
+        g.db = sqlite3.connect(
+           current_app.config['SQLALCHEMY_DATABASE_URI']
+        )
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+
 class Base:
     """Base class to access values with units"""
     def get_value_with_unit(self, col_name: str):
@@ -96,7 +107,6 @@ class Measurement(db.Model, Base):
     # TODO: confusion with different names measurement_series and measurement_values
     date = db.Column(db.String, nullable=False, info={'label': 'Datum', 'format': 'YY-MM-DD'})
     measurement_series = db.Column(db.String(80), nullable=False, info={'label': 'Messreihe'})
-    weather = db.Column(db.String(80), nullable=False, info={'label': 'Wetter'})
     producer = db.Column(db.String(80), nullable=False, info={'label': 'Erfasser'})
 
     pv_module_id = db.Column(db.Integer, db.ForeignKey('pv_module.id'), nullable=False)
@@ -109,6 +119,8 @@ class MeasurementValues(db.Model, Base):
     __tablename__ = 'measurement_values'
 
     id = db.Column(db.Integer, primary_key=True)
+
+    weather = db.Column(db.String(80), nullable=True, info={'label': 'Wetter'})
 
     _U_module = db.Column('U_module[V]', db.Float, nullable=False,
                           info={'label': 'Spannung des Modules', 'unit': 'V'})
@@ -223,9 +235,9 @@ class MeasurementValues(db.Model, Base):
 
 class PvModule(db.Model, Base):
     """PV Module used for measurement
-        model:          modelnumber of the cell, does not have to be an int
-        manufacturer:   name of the manufacturer
-        cell_type:      specifies type of cell(e.g. organic)
+        model:                  modelnumber of the cell, does not have to be an int
+        manufacturer:           name of the manufacturer
+        cell_type:              specifies type of cell(e.g. organic)
 
         manufacturer_data:      one-to-one relationship, STC values of manufacturer
         flasher_data:           one-to-one relationship as obtained by Flasher measurement
@@ -331,7 +343,7 @@ class ManufacturerData(db.Model, Base):
 
 
 class FlasherData(db.Model, Base):
-    """data as flasher measurement"""
+    """data for PvModule from flasher measurement"""
     __tablename__ = 'flasher_data'
 
     # flasher data

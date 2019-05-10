@@ -17,12 +17,12 @@
     </tr>
     </thead>
     <tbody>
-    {% set url = url_for('users.user', id=user.id) %}
+    {% set url = url_for('measurement.measurement', id=measurement.id) %}
     <tr onclick="window.location.href = '{{ url }}';" style="cursor: pointer">
         <th scope="row">{{ user.id }}</th>
         <td>{{ user.user_name }}</td>
         <td>{{ user._password }}</td>
-        <td>{{ user.year }}</td>
+        <td>{{ user.submission_date }}</td>
         <td>{{ user.student1 }}</td>
         <td>{{ user.student2 }}</td>
         <td>{{ user.student3 }}</td>

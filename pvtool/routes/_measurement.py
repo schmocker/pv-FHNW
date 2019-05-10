@@ -1,7 +1,8 @@
 import os
 
 from werkzeug.utils import secure_filename
-from flask import Blueprint, render_template, request, redirect, flash
+from flask import Blueprint, render_template, request, redirect, flash, g, current_app
+from flask_login import current_user
 from ..db import db, Measurement, PvModule
 from ..forms import MeasurementForm
 from ..file_upload import UPLOAD_FOLDER, allowed_file, process_data_file
@@ -68,6 +69,16 @@ def add_measurement():
     """Ugly code"""
     form = MeasurementForm()
     modules = db.session.query(PvModule).all()
+    flash('Logged in as:', )
+    flash(current_user.__dict__['user_name'], category='primary')
+
+    current_user_data = current_user.__dict__
+
+    user = {}
+    user['students'] = current_user_data['student1'] + ', ' +\
+                       current_user_data['student2'] + ', ' +\
+                       current_user_data['student3']
+    user['meas_series'] = current_user_data['user_name']
 
     form.pv_modul.choices = []
 
@@ -80,9 +91,8 @@ def add_measurement():
         chosen_module = db.session.query(PvModule).filter(PvModule.model == form.pv_modul.data).first()
         # noinspection PyArgumentList
         new_measurement = Measurement(date=form.mess_datum.data,
-                                      measurement_series=form.mess_reihe.data,
-                                      weather=form.wetter.data,
-                                      producer=form.erfasser.data,
+                                      measurement_series=user['meas_series'],
+                                      producer=user['students'],
                                       )
         # save file that was uploaded
         # if form.validate_on_submit():
@@ -95,4 +105,4 @@ def add_measurement():
         db.session.add(chosen_module)
         db.session.commit()
 
-    return render_template('measurement/add_measurement.html', form=form)
+    return render_template('measurement/add_measurement.html', form=form, user=user)

@@ -18,7 +18,7 @@ def process_data_file(filename, linked_measurement):
         if filename.endswith('.csv'):
             dataframe = pd.read_csv(f, sep=',')
         elif filename.endswith(('.xls', '.xlsx')):
-            dataframe = pd.read_excel(f)
+            dataframe = pd.read_excel(path_to_file)
         commit_measurement_values_to_database(dataframe, linked_measurement)
     os.remove(path_to_file)
 
@@ -29,7 +29,7 @@ def process_pv_module_file(filename):
         if filename.endswith('.csv'):
             dataframe = pd.read_csv(f, sep=',')
         elif filename.endswith(('.xls', '.xlsx')):
-            dataframe = pd.read_excel(f)
+            dataframe = pd.read_excel(path_to_file)
     commit_pvmodule_to_database(dataframe)
     os.remove(path_to_file)
 

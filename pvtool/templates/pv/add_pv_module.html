@@ -3,20 +3,33 @@
 {% block content %}
 
     <h1>PV-Modul hinzufügen</h1>
-    <form action="" method="post" novalidate>
+    <form action="" method="post" novalidate enctype="multipart/form-data">
         {{ form.hidden_tag() }}
-        <d1>
-            {{ render_field(form.modellnummer) }}
-            {{ render_field(form.hersteller) }}
-            {{ render_field(form.zelltyp) }}
-            {{ render_field(form.neupreis) }}
-            {{ render_field(form.bemerkung) }}
-            {{ render_field(form.laenge) }}
-            {{ render_field(form.breite) }}
-            {{ render_field(form.widerstand) }}
-            {{ render_field(form.accept_rules) }}
-        </d1>
-        <p> {{ form.submit() }}</p>
+        <div class="form-group col-4">
+            {{ form.modellnummer.label }} {{ form.modellnummer(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form.hersteller.label }} {{ form.hersteller(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form.zelltyp.label }} {{ form.zelltyp(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form.neupreis.label }} {{ form.neupreis(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form.bemerkung.label }} {{ form.bemerkung(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form.laenge.label }} {{ form.laenge(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form.breite.label }} {{ form.breite(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form.widerstand.label }} {{ form.widerstand(**{"class":"form-control"}) }}
+        </div>
+        <p class="form-group"> {{ form.submit(**{"class":"btn-primary"}) }}</p>
     </form>
 
 {% endblock %}

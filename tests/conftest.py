@@ -44,24 +44,46 @@ class AuthActions(object):
     def logout(self):
         return self._client.get('/signout')
 
+
 @pytest.fixture
 def auth(client):
     return AuthActions(client)
+
 
 @pytest.fixture
 def init_db(app):
     db.create_all()
 
-    user = User(user_name='TESTUSER',_password='testpassword')
-    db.session.add(user)
+    new_user = User(2000, 'Hans',
+                    'Jakob', 'Heiri')
 
+    new_user.user_name = 'TESTUSER'
+    new_user._password = 'testpassword'
+
+    db.session.add(new_user)
     db.session.commit()
 
     yield db
 
     db.drop_all()
 
+
 @pytest.fixture
 def runner(app):
     """Fixture for Command Line Interface testing"""
     return app.test_cli_runner()
+
+
+# add support for incremental tests
+def pytest_runtest_makereport(item, call):
+    if "incremental" in item.keywords:
+        if call.excinfo is not None:
+            parent = item.parent
+            parent._previousfailed = item
+
+
+def pytest_runtest_setup(item):
+    if "incremental" in item.keywords:
+        previousfailed = getattr(item.parent, "_previousfailed", None)
+        if previousfailed is not None:
+            pytest.xfail("previous test failed (%s)" % previousfailed.name)

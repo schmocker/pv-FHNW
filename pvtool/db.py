@@ -118,7 +118,7 @@ class MeasurementValues(db.Model, Base):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    weather = db.Column(db.String(80), nullable=True, info={'label': 'Wetter'})
+    weather = db.Column('Wetter', db.String(80), nullable=True, info={'label': 'Wetter'})
 
     _U_module = db.Column('U_module[V]', db.Float, nullable=False,
                           info={'label': 'Spannung des Modules', 'unit': 'V'})
@@ -133,13 +133,13 @@ class MeasurementValues(db.Model, Base):
     _U_G_pan = db.Column('U_G_pan[V]', db.Float, nullable=False,
                          info={'label': 'Spannung des Pyranometers für die Strahlung mit Modulneigung', 'unit': 'V'})
     _U_G_ref = db.Column('U_G_ref[V]', db.Float, nullable=False,
-                         info={'label': 'Spannung des Referenzzelle', 'unit': 'V'})
+                         info={'label': 'Spannung der Referenzzelle', 'unit': 'V'})
 
     measurement_id = db.Column(db.Integer, db.ForeignKey('measurement.id'), nullable=False)
 
     @classmethod
     def get_xlsx_template(cls):
-        columns = [cls._U_module, cls._U_shunt, cls._U_T_amb, cls._U_T_pan, cls._U_G_hor, cls._U_G_pan, cls._U_G_ref]
+        columns = [cls.weather, cls._U_module, cls._U_shunt, cls._U_T_amb, cls._U_T_pan, cls._U_G_hor, cls._U_G_pan, cls._U_G_ref]
 
         output = BytesIO()
         book = xlsxwriter.Workbook(output)
@@ -167,6 +167,10 @@ class MeasurementValues(db.Model, Base):
         book.close()
         output.seek(0)
         return output
+
+    @property
+    def Wetter(self):
+        return self.weather
 
     @property
     def U_module(self):

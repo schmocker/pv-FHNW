@@ -1,11 +1,12 @@
 """Overview of all Measurements and linked functions such as uploading removing and single view of measurement"""
 import os
 from werkzeug.utils import secure_filename
-from flask import Blueprint, render_template, request, redirect, flash, g, current_app
-from flask_login import current_user
+from flask import Blueprint, render_template, request, redirect, flash, g, current_app, url_for
+from flask_login import current_user, login_required
 from ..db import db, Measurement, PvModule
 from ..forms import MeasurementForm
-from ..file_upload import UPLOAD_FOLDER, allowed_file, process_data_file
+from ..file_upload import UPLOAD_FOLDER, allowed_file, process_data_file, InvalidFileType
+from ._users import add_timestamp
 
 measurement_routes = Blueprint('measurement', __name__, template_folder='templates')
 
@@ -71,22 +72,26 @@ def upload_file():
 
 
 @measurement_routes.route('/add_measurement', methods=['GET', 'POST'])
+@login_required
 def add_measurement():
     """Form to add measurement with populated pvmodules field"""
     form = MeasurementForm()
     modules = db.session.query(PvModule).all()
-    flash('Logged in as:', )
-    flash(current_user.__dict__['user_name'], category='primary')
 
     current_user_data = current_user.__dict__
 
-    user = {}
-    user['students'] = current_user_data['student1'] + ', ' +\
-                       current_user_data['student2'] + ', ' +\
-                       current_user_data['student3']
-    user['meas_series'] = current_user_data['user_name']
+    user = {'students': current_user_data['student1'] + ', ' +
+                        current_user_data['student2'] + ', ' +
+                        current_user_data['student3'],
+            'meas_series': current_user_data['user_name']}
 
     form.pv_modul.choices = []
+
+    # Every user can only insert one measurement
+    if db.session.query(Measurement).filter(Measurement.measurement_series == user['meas_series']).first() is not None:
+        print(db.session.query(Measurement).filter(Measurement.measurement_series == user['meas_series']).first())
+        flash('Sie haben bereits eine Messung hinzugefügt.', category='danger')
+        return redirect(url_for('measurement.measurements'))
 
     # populate select field with available distinct modules
     for module in modules:
@@ -107,8 +112,20 @@ def add_measurement():
         f.save(os.path.join(UPLOAD_FOLDER, filename))
 
         chosen_module.measurements.append(new_measurement)
-        process_data_file(filename, new_measurement)
+        try:
+            process_data_file(filename, new_measurement)
+        except InvalidFileType:
+            flash('Messung hochladen fehlgeschlagen!', category='danger')
+            return redirect(url_for('measurement.measurements'))
         db.session.add(chosen_module)
         db.session.commit()
+
+        add_timestamp()
+        flash('Messung erfolgreich hinzugefügt.', category='success')
+        return redirect(url_for('measurement.measurements'))
+
+    # flash current user
+    flash('Angemeldet als:', )
+    flash(current_user_data['user_name'], category='primary')
 
     return render_template('measurement/add_measurement.html', form=form, user=user)

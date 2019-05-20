@@ -30,7 +30,7 @@ class LoginForm(FlaskForm):
 
 class GenerateUser(FlaskForm):
     """Form for master to specify generation of user"""
-    jahr = StringField('Jahr')
+    jahr = IntegerField('Jahr')
     anzahl_benutzer = IntegerField('Anzahl Benutzer')
     student1 = StringField('1.Student')
     student2 = StringField('2.Student')
@@ -48,7 +48,7 @@ class PvModuleForm(BaseForm):
     laenge = FloatField('Länge[m]', [validators.length(min=5, max=40)])
     breite = FloatField('Breite[m]', [validators.length(min=5, max=40)])
     widerstand = FloatField('Widerstand[Ohm]', [validators.data_required])
-    pv_modul_file = FileField('PV Module')
+    pv_modul_file = FileField('PV Module in xlsx- oder csv- Format')
 
 
 class ManufacturerDataForm(BaseForm):

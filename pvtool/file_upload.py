@@ -2,25 +2,50 @@ import os
 import pandas as pd
 from .db import db, Measurement, PvModule, FlasherData, ManufacturerData, MeasurementValues
 import configparser
+from flask import flash
+from .routes._main import internal_server_error
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'pvtool/files')
 ALLOWED_EXTENSIONS = set(['csv', 'xls', 'xlsx'])
+
+
+class InvalidFileType(Exception):
+    pass
+
+
+class InvalidTemplate(Exception):
+    pass
 
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def handle_invalid_file_type(path_to_file):
+    flash('Ungültiges Dateiformat', category='danger')
+    os.remove(path_to_file)
+    raise InvalidFileType('Invalid file type was inserted')
+
+
 def process_data_file(filename, linked_measurement):
     """open the file containing data and pass table as pandas dataframe with measurement to be linked"""
     path_to_file = os.path.join(UPLOAD_FOLDER, filename)
-    with open(path_to_file) as f:
-        if filename.endswith('.csv'):
-            dataframe = pd.read_csv(f, sep=',')
-        elif filename.endswith(('.xls', '.xlsx')):
-            dataframe = pd.read_excel(path_to_file)
-        commit_measurement_values_to_database(dataframe, linked_measurement)
-    os.remove(path_to_file)
+    try:
+        with open(path_to_file) as f:
+            if filename.endswith('.csv'):
+                dataframe = pd.read_csv(f, sep=',')
+            elif filename.endswith(('.xls', '.xlsx')):
+                dataframe = pd.read_excel(path_to_file)
+            else:
+                handle_invalid_file_type(path_to_file)
+                return
+            commit_measurement_values_to_database(dataframe, linked_measurement)
+        os.remove(path_to_file)
+    except InvalidTemplate:
+        flash('Hochgeladene Messwerte sind ungültig.', category='danger')
+        raise InvalidFileType
+    except FileNotFoundError:
+        internal_server_error()
 
 
 def process_pv_module_file(filename):
@@ -45,9 +70,7 @@ def get_columns_of_table(type_of_data):
         config.read(filepath)
     except FileNotFoundError:
         return
-    print(config.sections())
     columns = [option for option in config[type_of_data]]
-    print("new columns: ", columns)
     return columns
 
 
@@ -67,21 +90,25 @@ def convert_df_columns_to_desired_type(type_of_data, df):
 
 def commit_measurement_values_to_database(df, linked_measurement):
     """take data frame and write it as dictionary and insert into sql alchemy"""
-    print("current columns: ", df.columns)
-    df.columns = get_columns_of_table("MEASUREMENT")
+    new_columns = get_columns_of_table('MEASUREMENT')
+    if len(df.columns) != len(new_columns):
+        raise InvalidTemplate()
+        return
+    df.columns = new_columns
     convert_df_columns_to_desired_type("MEASUREMENT", df)
 
     # format: dict like {index -> {column -> value}}
     dictionary_for_insertion = df.to_dict(orient='index')
-    print(dictionary_for_insertion)
 
-    # "**" star operator take dictionary for values in ORM model
-    for key in dictionary_for_insertion:
-        print(dictionary_for_insertion[key])
-        new_measurement_values = MeasurementValues(**(dictionary_for_insertion[key]))
-        linked_measurement.measurement_values.append(new_measurement_values)
-        db.session.add(linked_measurement)
-    db.session.commit()
+    try:
+        # "**" star operator take dictionary for values in ORM model
+        for key in dictionary_for_insertion:
+            new_measurement_values = MeasurementValues(**(dictionary_for_insertion[key]))
+            linked_measurement.measurement_values.append(new_measurement_values)
+            db.session.add(linked_measurement)
+        db.session.commit()
+    except:
+        flash('Failed commit_measurement_to_database', category='danger')
 
 
 def commit_pvmodule_to_database(df):
@@ -111,17 +138,14 @@ def commit_pvmodule_to_database(df):
 
 def commit_dataframe_to_database(df, type_of_data="MEASUREMENT"):
     """take data frame and write it as dictionary and insert into sql alchemy"""
-    print("current columns: ", df.columns)
     df.columns = get_columns_of_table(type_of_data)
     convert_df_columns_to_desired_type(type_of_data, df)
 
     # format: dict like {index -> {column -> value}}
     dictionary_for_insertion = df.to_dict(orient='index')
-    print(dictionary_for_insertion)
     if type_of_data is 'MEASUREMENT':
         # "**" star operator take dictionary for values in ORM model
         for key in dictionary_for_insertion:
-            print(dictionary_for_insertion[key])
             new_data = Measurement(**(dictionary_for_insertion[key]))
             db.session.add(new_data)
     elif type_of_data is 'PVMODULE':

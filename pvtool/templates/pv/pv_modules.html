@@ -25,10 +25,10 @@
         <td>{{ module.manufacturer }}</td>
         <td>{{ module.cell_type }}</td>
         <td>{{ module.additional_information }}</td>
-        <td class="text-right">{{ module.price_CHF }}</td>
-        <td class="text-right">{{ module.length }}</td>
-        <td class="text-right">{{ module.width }}</td>
-        <td class="text-right">{{ module.shunt_resistance }}</td>
+        <td class="text-right">{{ round(module.price_CHF, 2) }}</td>
+        <td class="text-right">{{ round(module.length, 2) }}</td>
+        <td class="text-right">{{ round(module.width, 2) }}</td>
+        <td class="text-right">{{ round(module.shunt_resistance, 2) }}</td>
     </tr>
 
     {% endfor %}

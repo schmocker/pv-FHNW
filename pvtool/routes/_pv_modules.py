@@ -1,7 +1,7 @@
 """Overview of all modules and corresponding upload functions and insertion through forms"""
 import os
 from werkzeug.utils import secure_filename
-from flask import Blueprint, render_template, request, redirect, flash
+from flask import Blueprint, render_template, request, redirect, flash, url_for
 
 from ..db import PvModule, FlasherData, ManufacturerData, db
 
@@ -37,7 +37,7 @@ def pv_module():
 
 @pv_modules_routes.route('/pv_modules/add', methods=['GET', 'POST'])
 def add_pv_module():
-    """Add individual module by typing filling out form"""
+    """Add individual module by filling out form"""
     form = PvModuleForm()
     if request.method == 'POST':
         new_pv_module = PvModule(model=form.modellnummer.data,
@@ -87,13 +87,14 @@ def add_pv_module_data():
 
         db.session.add(current_module)
         db.session.commit()
+        return redirect(url_for('pv.pv_modules'))
 
     return render_template('pv/add_data.html', form_fl=form_flasher, form_m=form_manufacturer)
 
 
 @pv_modules_routes.route('/pv_modules/add_multiple_modules', methods=['GET','POST'])
 def add_multiple_pv_modules():
-    """Upload csv, xls or xlsx with complete values. Makes life a lot easier."""
+    """Upload csv, xls or xlsx with complete values"""
     form = PvModuleForm()
     if request.method == 'POST':
         f = form.pv_modul_file.data
@@ -102,13 +103,14 @@ def add_multiple_pv_modules():
         path_to_file = os.path.join(UPLOAD_FOLDER, filename)
         f.save(path_to_file)
         process_pv_module_file(filename)
+        return redirect(url_for('pv.pv_modules'))
     return render_template('pv/add_multiple_pv_modules.html', form=form)
 
 
 @pv_modules_routes.route('/pv_modules/edit', methods=['GET', 'POST'])
 def edit_pv_module():
     """change values of pvmodule
-    TODO: Fix it to populate files with already inserted values
+    TODO: Fix it to populate files with already inserted values or remove
     """
     pv_id = request.args.get('id', type=int)
     form = PvModuleForm()
@@ -129,5 +131,5 @@ def remove_pv_module():
         db.session.query(PvModule).filter(PvModule.id == pv_id).delete()
         db.session.commit()
 
-    return redirect('/pv_modules')
+    return redirect(url_for('pv.pv_modules'))
 

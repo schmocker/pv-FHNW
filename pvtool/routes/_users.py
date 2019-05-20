@@ -11,6 +11,7 @@ from random import randint
 from io import BytesIO
 import xlsxwriter
 import click
+import datetime
 
 login_manager = LoginManager()
 bcrypt = Bcrypt()
@@ -35,19 +36,18 @@ class User(UserMixin,db.Model):
 
     def is_correct_password(self, plaintext):
         return self._password == plaintext
-        #return bcrypt.check_password_hash(self._password, plaintext)
 
     def generate_password(self, year):
         password = 'pvtool'
         password += str(randint(1, 10e6))
-        password += '_' + year
+        password += '_' + str(year)
         return password
 
     def store_password(self, year):
         self._password = self.generate_password(year)
 
     def generate_username(self, group_number):
-        self.user_name = 'pv-FHNW_FS' + self.year + '_' + str(group_number)
+        self.user_name = 'pv-FHNW_FS' + str(self.year) + '_' + str(group_number)
 
     def __init__(self, year, student1, student2, student3):
         self.year = year
@@ -58,25 +58,6 @@ class User(UserMixin,db.Model):
 
     def _repr__(self):
         return '<User {0}'.format(self.user_name)
-
-
-@users_routes.route('/register', methods=['GET', 'POST'])
-def register():
-    """LEGACY: register a new user by typing a password twice.
-    TODO: remove in future versions"""
-    form = RegisterForm(request.form)
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            try:
-                new_user = User(form.user_name.data, form.password.data)
-                db.session.add(new_user)
-                db.session.commit()
-                flash('Vielen Dank für die Registrierung!', category='success')
-                return redirect(url_for('main.home'))
-            except IntegrityError:
-                db.session.rollback()
-                flash('Der Benutzername <{}> wird bereits verwendet.'.format(form.user_name.data), 'danger')
-    return render_template('main/register.html', form=form)
 
 
 @users_routes.route('/signin', methods=['GET', 'POST'])
@@ -102,8 +83,8 @@ def signin():
                 return redirect(next or url_for('main.home'))
             else:
                 flash('Passwort oder Benutzername falsch!', category='danger')
-                return redirect(url_for('main.signin'))
-    return render_template('/main/signin.html', form=form)
+                return redirect(url_for('users.signin'))
+    return render_template('/users/signin.html', form=form)
 
 
 @users_routes.route('/signout')
@@ -115,47 +96,46 @@ def signout():
     return redirect(url_for('main.home'))
 
 
-@users_routes.route('/generate_users', methods=['GET', 'POST'])
-def generate_users():
-    """send xlsx file with valid users"""
+@users_routes.route('/export_users')
+def export_users():
+    """send xlsx file with valid users
+    TODO: has troubles with updating template in same session, if db is changed and xlsx file is exported in same session
+    xlsx file might not change"""
+    template_name = 'login_pvtool.xlsx'
+    # create output
+    print('heeeeeello')
+    output = BytesIO()
 
-    form = GenerateUser(request.form)
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            print('hello')
-            template_name = 'login_pvtool_' + form.jahr.data + '.xlsx'
-            # create output
-            output = BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet('Logins')
+    bold = workbook.add_format({'bold': True})
 
-            workbook = xlsxwriter.Workbook(output)
-            worksheet = workbook.add_worksheet('Logins')
-            bold = workbook.add_format({'bold': True})
+    worksheet.write(0, 0, 'Benutzername', bold)
+    worksheet.write(0, 1, 'Passwort', bold)
+    worksheet.write(0, 2, '1.Student', bold)
+    worksheet.write(0, 3, '2.Student', bold)
+    worksheet.write(0, 4, '3.Student', bold)
+    row = 1
+    col = 0
+    users = db.session.query(User).all()
 
-            worksheet.write(0, 0, 'Benutzername', bold)
-            worksheet.write(0, 1, 'Passwort', bold)
-            row = 1
-            col = 0
-            for i in range(1, form.anzahl_benutzer.data + 1):
-                user = 'pv-FHNW' + form.jahr.data + '_' + str(i)
-                password = generate_password(form.jahr.data)
+    for user in users:
 
-                worksheet.write(row, col, user)
-                worksheet.write(row, col + 1, password)
+        worksheet.write(row, col, user.user_name)
+        worksheet.write(row, col + 1, user._password)
+        worksheet.write(row, col + 2, user.student1)
+        worksheet.write(row, col + 3, user.student2)
+        worksheet.write(row, col + 4, user.student3)
 
-                row += 1
-            workbook.close()
-            output.seek(0)
+        row += 1
+    workbook.close()
+    output.seek(0)
 
-            return send_file(output, attachment_filename=template_name, as_attachment=True)
-            print('over')
-            return redirect(url_for('users.users'))
-
-    return render_template('users/generate_users.html', form=form)
+    return send_file(output, attachment_filename=template_name, as_attachment=True)
 
 
-@users_routes.route('/generate_user', methods=['GET', 'POST'])
+@users_routes.route('/generate_user')
 def generate_user():
-    """send xlsx file with valid users"""
 
     form = GenerateUser(request.form)
     if request.method == 'POST':
@@ -206,3 +186,12 @@ def remove_user():
         db.session.commit()
 
     return redirect(url_for('users.users'))
+
+
+def add_timestamp():
+    """Adds a timestamp to the logged in user when measurement is uploaded"""
+    user = db.session.query(User).filter(User.id == current_user.id).first()
+    user.submission_date = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+
+    db.session.add(user)
+    db.session.commit()

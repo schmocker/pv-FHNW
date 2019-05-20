@@ -52,6 +52,12 @@ def create_app(config):
         db.session.commit()
         click.echo('Created admin user.')
 
+    # setup logging function
+    applogger = app.logger
+
+    # allow rounding
+    app.jinja_env.globals.update(round=round)
+
     # navigation
     nav = Navigation(app)
     nav.Bar('top', [

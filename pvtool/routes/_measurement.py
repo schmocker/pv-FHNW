@@ -3,7 +3,7 @@ import os
 from werkzeug.utils import secure_filename
 from flask import Blueprint, render_template, request, redirect, flash, g, current_app, url_for
 from flask_login import current_user, login_required
-from ..db import db, Measurement, PvModule
+from ..db import db, Measurement, PvModule, MeasurementValues
 from ..forms import MeasurementForm
 from ..file_upload import UPLOAD_FOLDER, allowed_file, process_data_file, InvalidFileType
 from ._users import add_timestamp
@@ -26,9 +26,11 @@ def measurement():
         if meas_id is None:
             raise Exception(f'no valid id for pv module')
         meas = Measurement.query.get(meas_id)
+        meas_values = MeasurementValues.query.filter(MeasurementValues.measurement.id == meas_id).all()
+        print(meas_values)
         if meas is None:
             raise Exception(f'no measurement with id {meas_id} exists')
-        return render_template('measurement/measurement.html', measurement=meas)
+        return render_template('measurement/measurement.html', measurement=meas, measurement_values=meas_values)
     except Exception as e:
         flash(str(e), category='danger')
         return redirect('measurements')

@@ -134,7 +134,7 @@ def export_users():
     return send_file(output, attachment_filename=template_name, as_attachment=True)
 
 
-@users_routes.route('/generate_user')
+@users_routes.route('/generate_user', methods=['GET', 'POST'])
 def generate_user():
 
     form = GenerateUser(request.form)

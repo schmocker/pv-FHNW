@@ -17,8 +17,7 @@
     </tr>
     </thead>
     <tbody>
-    {% set url = url_for('measurement.measurement', id=measurement.id) %}
-    <tr onclick="window.location.href = '{{ url }}';" style="cursor: pointer">
+    <tr>
         <th scope="row">{{ user.id }}</th>
         <td>{{ user.user_name }}</td>
         <td>{{ user._password }}</td>
@@ -31,5 +30,6 @@
 </table>
 
 <a href="{{ url_for('users.users') }}" class="btn btn-primary">Alle Benutzer anzeigen</a>
+<a href="{{ url_for('measurement.measurement', id = measurement.id) }}" class="btn btn-info">Messung anzeigen</a>
 <a href="{{ url_for('users.remove_user', id = user.id) }}" class="btn btn-danger">Benutzer entfernen</a>
 {% endblock %}

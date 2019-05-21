@@ -3,6 +3,7 @@
 {% block content %}
 
 <h1>Messung: {{ measurement.id }}</h1>
+<div>{{measurement_values.weather}}</div>
 
 <table class="table">
     <thead>
@@ -29,6 +30,7 @@
 </table>
 
 <a href="{{ url_for('measurement.measurements') }}" class="btn btn-primary">Alle Messungen anzeigen</a>
+<a href="{{ url_for('data.data', id=measurement.id)}}" class="btn btn-info">Visualisierung</a>
 <a href="{{ url_for('measurement.remove_measurement', id=measurement.id)}}" class="btn btn-danger">Messung entfernen</a>
-<a href="{{ url_for('data.data', id=measurement.id)}}" class="btn btn-info">Fancy plot</a>
+
 {% endblock %}

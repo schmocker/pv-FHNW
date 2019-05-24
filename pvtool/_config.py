@@ -21,6 +21,11 @@ class Config(object):
     DB_NAME = environ.get('DB_NAME', default="database")
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(ROOT_DIR,"temp",DB_NAME)}.db'
 
+class ConfigMigrated(object):
+    # DATABASE
+    DB_NAME = environ.get('DB_NAME', default="database")
+    SQLALCHEMY_DATABASE_URI = f'mysql:///{os.path.join(ROOT_DIR, "temp", DB_NAME)}.db'
+
 
 class TestingConfig(Config):
     ENV = True

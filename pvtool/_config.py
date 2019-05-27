@@ -22,13 +22,6 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(ROOT_DIR,"temp",DB_NAME)}.db'
 
 
-class ConfigMigrated(object):
-    # TODO: Extend with MySQL
-    # DATABASE
-    DB_NAME = environ.get('DB_NAME', default="database")
-    SQLALCHEMY_DATABASE_URI = f'mysql:///{os.path.join(ROOT_DIR, "temp", DB_NAME)}.db'
-
-
 class TestingConfig(Config):
     ENV = True
     LOGGING_LEVEL = int(environ.get('LOGGING_LEVEL', default=5))

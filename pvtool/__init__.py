@@ -1,6 +1,7 @@
 from flask import Flask
 from flask.cli import click
 from flask_navigation import Navigation
+from flask_login import login_required
 from pvtool._config import Config, TestingConfig
 from pvtool.db import db, PvModule
 from .routes import main_routes, pv_modules_routes, measurement_routes, page_not_found, internal_server_error, \

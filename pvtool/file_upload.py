@@ -33,7 +33,7 @@ def process_data_file(filename, linked_measurement):
     try:
         with open(path_to_file) as f:
             if filename.endswith('.csv'):
-                dataframe = pd.read_csv(f, sep=',')
+                dataframe = pd.read_csv(f, sep=',', encoding='utf-8')
             elif filename.endswith(('.xls', '.xlsx')):
                 dataframe = pd.read_excel(path_to_file)
             else:

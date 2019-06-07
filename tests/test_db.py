@@ -53,7 +53,16 @@ class TestDBModels(object):
             WHEN database is initialized
             THEN check if measurement_values can be inserted and removed
         """
-        test_measurement_values = MeasurementValues(weather='TEST')
+        test_measurement_values = MeasurementValues(weather='TEST',
+                                                    _U_module=0,
+                                                    _U_shunt=0,
+                                                    _U_T_amb=0,
+                                                    _U_T_pan=0,
+                                                    _U_G_hor=0,
+                                                    _U_G_pan=0,
+                                                    _U_G_ref=0,
+                                                    measurement_id=1,
+                                                    )
 
         db.session.add(test_measurement_values)
         db.session.commit()
@@ -61,7 +70,7 @@ class TestDBModels(object):
         query_result = db.session.query(MeasurementValues).\
             filter(MeasurementValues.weather == test_measurement_values.weather).first()
         assert query_result
-        db.session.query(Measurement).filter(MeasurementValues.weather == test_measurement_values.weather).delete()
+        db.session.query(MeasurementValues).filter(MeasurementValues.weather == test_measurement_values.weather).delete()
         db.session.commit()
 
 

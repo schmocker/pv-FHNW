@@ -2,35 +2,66 @@
 
 {% block content %}
 
-<h1>Messung: {{ measurement.id }}</h1>
+<h1>Messung: {{ measurement.measurement_series }}</h1>
 <div>{{measurement_values.weather}}</div>
 
-<table class="table">
+<table class="table table-hover">
     <thead>
     <tr>
-        <th scope="col">Bezeichnung</th>
-        <th scope="col">Datenursprung</th>
-        <th scope="col">Wert</th>
-        <th scope="col">Einheit</th>
+        <th scope="col">Datum</th>
+        <th scope="col">Messreihe</th>
+        <th scope="col">Erfasser</th>
     </tr>
     </thead>
     <tbody>
-    {% set cls = measurement.__class__ %}
-    {% for col_name in cls.get_column_names() %}
-    {% set col = cls|attr(col_name) %}
-    {% if col.info['label'] %}
-    <tr>
-        <th scope="row">{{ col.info['label'] }}</th>
-        <td>{{ col.info['origin'] }}</td>
-        <td class="text-right">{{ measurement.get_value(col_name) }}</td>
-        <td>{{ col.info['unit'] }}</td>
-    </tr>{% endif %}
-    {% endfor %}
+    {% set url = url_for('measurement.measurement', id=measurement.id) %}
+    <tr onclick="window.location.href = '{{ url }}';" style="cursor: pointer">
+        <th scope="row">{{ measurement.date }}</th>
+        <td>{{ measurement.measurement_series }}</td>
+        <td>{{ measurement.producer }}</td>
+    </tr>
+
     </tbody>
 </table>
+<div class="row">
+    <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+    Messwerte anzeigen
+    </button>
+    <table class="table table-bordered table-hovered collapse" id="collapseExample">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">U[V]</th>
+                <th scope="col">U_Shunt[V]</th>
+                <th scope="col">U_T_amb[V]</th>
+                <th scope="col">U_G_hor[V]</th>
+                <th scope="col">U_G_pan[V]</th>
+                <th scope="col">U_G_ref[V]</th>
+                <th scope="col">U_T_pan[V]</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for d in measurement_values %}
+            <tr>
+                <th scope="row">{{ d.id }}</th>
+                <td class="text-right">{{ round(d._U_module, 2) }}</td>
+                <td class="text-right">{{ round(d._U_shunt, 2) }}</td>
+                <td class="text-right">{{ round(d.T_amb, 2) }}</td>
+                <td class="text-right">{{ round(d.T_pan, 2) }}</td>
+                <td class="text-right">{{ round(d.G_hor, 2) }}</td>
+                <td class="text-right">{{ round(d.G_pan, 2) }}</td>
+                <td class="text-right">{{ round(d.G_ref, 2) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-<a href="{{ url_for('measurement.measurements') }}" class="btn btn-primary">Alle Messungen anzeigen</a>
-<a href="{{ url_for('data.data', id=measurement.id)}}" class="btn btn-info">Visualisierung</a>
-<a href="{{ url_for('measurement.remove_measurement', id=measurement.id)}}" class="btn btn-danger">Messung entfernen</a>
+<div class="row">
+    <a href="{{ url_for('measurement.measurements') }}" class="btn btn-primary">Alle Messungen anzeigen</a>
+    <a href="{{ url_for('data.data', id=measurement.id)}}" class="btn btn-info">Visualisierung</a>
+    <a href="{{ url_for('measurement.remove_measurement', id=measurement.id)}}" class="btn btn-danger">Messung entfernen</a>
+</div>
+
 
 {% endblock %}

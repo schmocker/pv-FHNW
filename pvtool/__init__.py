@@ -37,21 +37,22 @@ def create_app(config):
 
     bcrypt.init_app(app)
 
-    @click.command('create_admin')
+    @app.before_first_request
     def create_admin():
         """register an admin user via command"""
-        if len(db.session.query(User).filter(User.rights == 'ADMIN').all()) >= 0:
-            click.echo('There already is an Admin user')
+        if len(db.session.query(User).filter(User.user_name == 'admin').all()) > 0:
+            print(db.session.query(User).filter(User._rights == 'ADMIN').all())
+            print('There already is an admin!')
             return
         new_user = User('-', '-',
                         '-', '-')
-        new_user.rights = 'Admin'
+        new_user._rights = 'Admin'
         new_user.user_name = 'admin'
-        new_user._password = 'admin'
+        new_user._password = 'cleantech'
 
         db.session.add(new_user)
         db.session.commit()
-        click.echo('Created admin user.')
+        print('created admin user')
 
     # setup logging function
     applogger = app.logger
@@ -63,10 +64,13 @@ def create_app(config):
     nav = Navigation(app)
     nav.Bar('top', [
         nav.Item('Home', 'main.home'),
-        nav.Item('PV-Module', 'pv.pv_modules'),
-        nav.Item('Messungen', 'measurement.measurements'),
-        nav.Item('Data', 'data.data'),
-        nav.Item('Benutzer', 'users.users')
+        nav.Item('Photovoltaik an der FHNW', 'main.test'),
+        nav.Item('Laborübung Photovoltaik', 'main.test', items=[
+            nav.Item('PV-Module', 'pv.pv_modules'),
+            nav.Item('Messungen', 'measurement.measurements'),
+            nav.Item('Data', 'data.data'),
+            nav.Item('Benutzer', 'users.users'),
+        ]),
     ])
 
     # routes
@@ -79,6 +83,5 @@ def create_app(config):
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(500, internal_server_error)
 
-    app.cli.add_command(create_admin)
 
     return app

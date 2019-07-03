@@ -30,7 +30,20 @@
         </div>
         {% endif %}
 
-        </div>
+            {% if current_user.is_anonymous %}
+            <div class="col-md-6">
+                <h6>External Links</h6>
+                <ul>
+                    <li>
+                        <a href="https://www.fhnw.ch/de/die-fhnw/hochschulen/ht/institute/institut-fuer-biomasse-und-ressourceneffizienz">
+                            Institut für Biomasse und Ressourceneffizienz</a></li>
+                    <li><a href="https://www.fhnw.ch/de/studium/technik/energie-umwelttechnik">
+                        Energie- und Umwelttechnik</a></li>
+                </ul>
+            </div>
+            {% endif %}
+
+
         <!--Grid row-->
     </div>
     <!-- Footer Elements -->

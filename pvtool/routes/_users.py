@@ -1,5 +1,5 @@
 """Implements login function and links users to measurement"""
-from flask import Blueprint, flash, render_template, redirect, url_for, request, abort, send_file, current_app, g
+from flask import Blueprint, flash, render_template, redirect, url_for, request, abort, send_file, session
 from sqlalchemy.exc import IntegrityError
 from flask_login import LoginManager, login_user, logout_user, UserMixin, current_user
 from ..db import db, get_db, Measurement
@@ -7,6 +7,7 @@ from ._main import is_safe_url
 from flask_bcrypt import Bcrypt
 from ..forms import RegisterForm, GenerateUser, LoginForm
 
+from functools import wraps
 from random import randint
 from io import BytesIO
 import xlsxwriter
@@ -17,6 +18,23 @@ login_manager = LoginManager()
 bcrypt = Bcrypt()
 
 users_routes = Blueprint('users', __name__, template_folder='templates')
+
+
+def requires_access_level(access):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                flash('Bitte melden Sie sich an um diese Seite zu sehen.', category='info')
+                return redirect(url_for('users.signin'))
+
+            user = current_user
+            if not user._rights == access:
+                flash('Sie haben keinen Zugriff zu dieser Seite.', category='danger')
+                return redirect(url_for('main.home'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 
 class User(UserMixin,db.Model):
@@ -32,7 +50,10 @@ class User(UserMixin,db.Model):
     student2 = db.Column(db.String)
     student3 = db.Column(db.String)
     submission_date = db.Column(db.String, default='nicht eingereicht')
-    rights = db.Column(db.String, default='student')
+    _rights = db.Column(db.String, default='student')
+
+    def get_rights(self):
+        return self._rights
 
     def is_correct_password(self, plaintext):
         return self._password == plaintext
@@ -97,6 +118,7 @@ def signout():
 
 
 @users_routes.route('/export_users')
+#@requires_access_level('admin')
 def export_users():
     """send xlsx file with valid users
     TODO: has troubles with updating template in same session, if db is changed and xlsx file is exported in same session
@@ -135,6 +157,7 @@ def export_users():
 
 
 @users_routes.route('/generate_user', methods=['GET', 'POST'])
+#@requires_access_level('admin')
 def generate_user():
 
     form = GenerateUser(request.form)
@@ -154,6 +177,7 @@ def generate_user():
 
 
 @users_routes.route('/users')
+#@requires_access_level('admin')
 def users():
     """Overview as table of all registered users"""
     users = User.query.all()
@@ -161,6 +185,7 @@ def users():
 
 
 @users_routes.route('/user')
+#@requires_access_level('admin')
 def user():
     """Detailed view for specific user"""
     try:
@@ -178,6 +203,7 @@ def user():
 
 
 @users_routes.route('/users/remove')
+#@requires_access_level('admin')
 def remove_user():
     """Remove user without cascading deletion of inserted measurements"""
     user_id = request.args.get('id', type=int)

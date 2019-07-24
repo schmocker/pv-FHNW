@@ -9,7 +9,8 @@ Welcome to pv-FHNW's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
+   intro
+   tutorial
 
 
 Indices and tables

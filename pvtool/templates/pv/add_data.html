@@ -28,4 +28,30 @@
         <p> {{ form_m.submit() }}</p>
     </form>
 
+    <form action="" method="post" novalidate enctype="multipart/form-data">
+        {{ form_fl.hidden_tag() }}
+        <div class="form-group col-4">
+            {{ form_fl.einstrahlung_fl.label }} {{ form_fl.einstrahlung_fl(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form_fl.modultemperatur_fl.label }} {{ form_fl.modultemperatur_fl(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form_fl.u_mpp_fl.label }} {{ form_fl.u_mpp_fl(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form_fl.i_mpp_fl.label }} {{ form_fl.i_mpp_fl(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form_fl.u_ll_fl.label }} {{ form_fl.u_ll_fl(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form_fl.i_ks_fl.label }} {{ form_fl.i_ks_fl(**{"class":"form-control"}) }}
+        </div>
+        <div class="form-group col-4">
+            {{ form_fl.ff_fl.label }} {{ form_fl.ff_fl(**{"class":"form-control"}) }}
+        </div>
+        <p class="form-group"> {{ form_fl.submit(**{"class":"btn-primary"}) }}</p>
+    </form>
+
 {% endblock %}

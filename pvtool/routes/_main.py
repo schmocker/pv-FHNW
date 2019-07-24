@@ -28,7 +28,7 @@ def internal_server_error(e):
 @main_routes.route('/test')
 def test():
     """TODO: Remove this function"""
-    return render_template('test.html')
+    return render_template('main/pv_at_fhnw.html')
 
 
 def is_safe_url(target):

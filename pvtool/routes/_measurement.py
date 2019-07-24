@@ -14,7 +14,7 @@ measurement_routes = Blueprint('measurement', __name__, template_folder='templat
 @measurement_routes.route('/measurements')
 def measurements():
     """Display all measurements as table with clickable individual measurements"""
-    measurements_for_displaying = Measurement.query.all()
+    measurements_for_displaying = db.session.query(Measurement).all()
     return render_template('measurement/measurements.html', measurements=measurements_for_displaying)
 
 
@@ -25,8 +25,8 @@ def measurement():
         meas_id = request.args.get('id', type=int)
         if meas_id is None:
             raise Exception(f'no valid id for pv module')
-        meas = Measurement.query.get(meas_id)
-        meas_values = MeasurementValues.query.filter(MeasurementValues.measurement.id == meas_id).all()
+        meas = db.session.query(Measurement).get(meas_id)
+        meas_values = db.session.query(MeasurementValues).filter(MeasurementValues.measurement_id == meas_id).all()
         print(meas_values)
         if meas is None:
             raise Exception(f'no measurement with id {meas_id} exists')

@@ -25,8 +25,8 @@ def internal_server_error(e):
     return render_template('main/500.html'), 500, 'hallo'
 
 
-@main_routes.route('/test')
-def test():
+@main_routes.route('/pv_at_fhnw')
+def pv_at_fhnw():
     """TODO: Remove this function"""
     return render_template('main/pv_at_fhnw.html')
 

@@ -139,7 +139,9 @@ class MeasurementValues(db.Model, Base):
 
     @classmethod
     def get_xlsx_template(cls):
-        columns = [cls.weather, cls._U_module, cls._U_shunt, cls._U_T_amb, cls._U_T_pan, cls._U_G_hor, cls._U_G_pan, cls._U_G_ref]
+        print('hello')
+        columns = [cls.weather, cls._U_module, cls._U_shunt, cls._U_T_amb, cls._U_G_hor,   cls._U_G_pan, cls._U_G_ref,
+                   cls._U_T_pan]
 
         output = BytesIO()
         book = xlsxwriter.Workbook(output)
@@ -147,6 +149,7 @@ class MeasurementValues(db.Model, Base):
 
         sheet_data = book.add_worksheet('data')
         for i, cn in enumerate(columns):
+            print(cn.name)
             sheet_data.write(0, i, cn.name, bold)
             for j in range(10):
                 sheet_data.write(j + 1, i, 0)
@@ -159,7 +162,6 @@ class MeasurementValues(db.Model, Base):
         for i, cn in enumerate(columns):
             sheet_info.write(i + 1, 0, cn.name)
             sheet_info.write(i + 1, 1, cn.info['label'])
-            sheet_info.write(i + 1, 2, cn.info['unit'])
         sheet_info.set_column(0, 0, 15)
         sheet_info.set_column(1, 1, 60)
         sheet_info.set_column(2, 2, 8)
@@ -190,11 +192,11 @@ class MeasurementValues(db.Model, Base):
 
     @property
     def G_hor(self):
-        return (self._U_G_hor - 2) * 100
+        return (self._U_G_hor - 2) * 200
 
     @property
     def G_pan(self):
-        return (self._U_G_pan - 2) * 100
+        return (self._U_G_pan - 2) * 200
 
     @property
     def G_ref(self):
@@ -228,7 +230,7 @@ class MeasurementValues(db.Model, Base):
 
     @staticmethod
     def U_2_U_stc(U_messured, G_pan, G_stc, T_pan, T_stc, a_U_oc):
-        return U_messured / (np.log(G_pan) / (np.log(G_stc) * (1 + a_U_oc * (T_pan - T_stc)*ureg.K)))
+        return U_messured / (np.log(G_pan) / np.log(G_stc) * (1 + a_U_oc * (T_pan - T_stc)*ureg.K))
 
     @staticmethod
     def I_2_I_stc(I_messured, G_pan, G_stc, T_pan, T_stc, a_I_sc):

@@ -5,8 +5,9 @@ from flask import Blueprint, render_template, request, redirect, flash, g, curre
 from flask_login import current_user, login_required
 from ..db import db, Measurement, PvModule, MeasurementValues
 from ..forms import MeasurementForm
-from ..file_upload import UPLOAD_FOLDER, allowed_file, process_data_file, InvalidFileType
-from ._users import add_timestamp
+from ..file_upload import UPLOAD_FOLDER, allowed_file, process_data_file, InvalidFileType,\
+    process_multiple_measurements_file
+from ._users import add_timestamp, requires_access_level
 
 measurement_routes = Blueprint('measurement', __name__, template_folder='templates')
 
@@ -37,6 +38,7 @@ def measurement():
 
 
 @measurement_routes.route('/measurement/remove')
+@requires_access_level('Admin')
 def remove_measurement():
     """Remove the individual measurement and its corresponding measurement values, does not affect the user"""
     meas_id = request.args.get('id', type=int)
@@ -131,3 +133,21 @@ def add_measurement():
     flash(current_user_data['user_name'], category='primary')
 
     return render_template('measurement/add_measurement.html', form=form, user=user)
+
+
+@measurement_routes.route('/add_measurements', methods=['GET', 'POST'])
+@requires_access_level('Admin')
+def add_measurements():
+    """Form to add measurement from excel, multiple measurements possible"""
+    form = MeasurementForm()
+
+    if request.method == 'POST':
+        f = form.messungen.data
+
+        filename = secure_filename(f.filename)
+        path_to_file = os.path.join(UPLOAD_FOLDER, filename)
+        f.save(path_to_file)
+        process_multiple_measurements_file(filename)
+        return redirect(url_for('measurement.measurements'))
+
+    return render_template('measurement/add_measurements.html', form=form)

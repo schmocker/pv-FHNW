@@ -7,28 +7,100 @@
 <table class="table">
     <thead>
     <tr>
-        <th scope="col">Bezeichnung</th>
-        <th scope="col">Datenursprung</th>
-        <th scope="col">Wert</th>
-        <th scope="col">Einheit</th>
+        <th scope="col">Model</th>
+        <th scope="col">Hersteller</th>
+        <th scope="col">Typ</th>
+        <th scope="col">Infos</th>
+        <th scope="col">Preis[CHF]</th>
+        <th scope="col">Länge[m]</th>
+        <th scope="col">Breite[m]</th>
+        <th scope="col">Shunt Widerstand[Ohm]</th>
     </tr>
     </thead>
     <tbody>
-    {% set cls = module.__class__ %}
-    {% for col_name in cls.get_column_names() %}
-    {% set col = cls|attr(col_name) %}
-    {% if col.info['label'] %}
-    <tr>
-        <th scope="row">{{ col.info['label'] }}</th>
-        <td>{{ col.info['origin'] }}</td>
-        <td class="text-right">{{ module.get_value(col_name) }}</td>
-        <td>{{ col.info['unit'] }}</td>
-    </tr>{% endif %}
-    {% endfor %}
+        <tr>
+                <tr>
+                    <th scope="row">{{ module.model }}</th>
+                    <td class="text-right">{{ module.manufacturer }}</td>
+                    <td class="text-right">{{ module.cell_type }}</td>
+                    <td class="text-right">{{ module.additional_information }}</td>
+                    <td class="text-right">{{ module.price_CHF }}</td>
+                    <td class="text-right">{{ module.length }}</td>
+                    <td class="text-right">{{ module.width }}</td>
+                    <td class="text-right">{{ module.shunt_resistance }}</td>
+                </tr>
+        </tr>
     </tbody>
 </table>
 
 <a href="{{ url_for('pv.pv_modules') }}" class="btn btn-primary">Alle PV-Module anzeigen</a>
+
+<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#manufacturerData" aria-expanded="false" aria-controls="manufacturerData">
+    Herstellerdaten anzeigen
+</button>
+
+<button class="btn btn-success" type="button" data-toggle="collapse" data-target="#flasherData" aria-expanded="false" aria-controls="flasherData">
+    Flasherdaten anzeigen
+</button>
+
 <a href="{{ url_for('pv.remove_pv_module', id=module.id)}}" class="btn btn-danger">Modul entfernen</a>
-<a href="{{ url_for('pv.add_pv_module_data', id=module.id)}}" class="btn btn-warning">Daten hinzufügen</a>
+
+<div class="row">
+    <table class="table table-bordered table-hovered collapse" id="manufacturerData" style="margin-top:10pt">
+        <thead>
+            <tr>
+
+                <th scope="col">U_mpp_m[V]</th>
+                <th scope="col">I_mpp_m[A]</th>
+                <th scope="col">U_oc_m[V]</th>
+                <th scope="col">I_sc_m[V]</th>
+                <th scope="col">Form-Faktor</th>
+                <th scope="col">U-T-Koeffizient[%/K]</th>
+                <th scope="col">I-T-Koeffizient[%/K]</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% set d = module.manufacturer_data %}
+            <tr>
+                <td class="text-right">{{ round(d._U_mpp_m, 2) }}</td>
+                <td class="text-right">{{ round(d._I_mpp_m, 2) }}</td>
+                <td class="text-right">{{ round(d._U_oc_m, 2) }}</td>
+                <td class="text-right">{{ round(d._I_sc_m, 2) }}</td>
+                <td class="text-right">{{ round(d._ff_m, 2) }}</td>
+                <td class="text-right">{{ round(d._a_U_oc, 2) }}</td>
+                <td class="text-right">{{ round(d._a_I_sc, 2) }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="row">
+    <table class="table table-bordered table-hovered collapse" id="flasherData" style="margin-top:10pt">
+        <thead>
+            <tr>
+
+                <th scope="col">U_mpp_f[V]</th>
+                <th scope="col">I_mpp_f[A]</th>
+                <th scope="col">U_oc_f[V]</th>
+                <th scope="col">I_sc_f[V]</th>
+                <th scope="col">Form-Faktor</th>
+                <th scope="col">G_f[W/m2]</th>
+                <th scope="col">T_modul[°C]</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% set d = module.flasher_data %}
+            <tr>
+                <td class="text-right">{{ round(d._U_mpp_f, 2) }}</td>
+                <td class="text-right">{{ round(d._I_mpp_f, 2) }}</td>
+                <td class="text-right">{{ round(d._U_oc_f, 2) }}</td>
+                <td class="text-right">{{ round(d._I_sc_f, 2) }}</td>
+                <td class="text-right">{{ round(d. _ff_f, 2) }}</td>
+                <td class="text-right">{{ round(d. _G_f, 2) }}</td>
+                <td class="text-right">{{ round(d._T_module_f, 2)}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
 {% endblock %}

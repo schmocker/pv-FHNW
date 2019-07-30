@@ -41,7 +41,7 @@ def create_app(config):
     def create_admin():
         """register an admin user via command"""
         if len(db.session.query(User).filter(User.user_name == 'admin').all()) > 0:
-            print(db.session.query(User).filter(User._rights == 'ADMIN').all())
+            print(db.session.query(User).filter(User._rights == 'Admin').all())
             print('There already is an admin!')
             return
         new_user = User('-', '-',
@@ -64,7 +64,7 @@ def create_app(config):
     nav = Navigation(app)
     nav.Bar('top', [
         nav.Item('Home', 'main.home'),
-        nav.Item('Photovoltaik an der FHNW', 'main.test'),
+        nav.Item('Photovoltaik an der FHNW', 'main.pv_at_fhnw'),
         nav.Item('Laborübung Photovoltaik', 'main.test', items=[
             nav.Item('PV-Module', 'pv.pv_modules'),
             nav.Item('Messungen', 'measurement.measurements'),

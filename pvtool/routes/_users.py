@@ -118,7 +118,7 @@ def signout():
 
 
 @users_routes.route('/export_users')
-#@requires_access_level('admin')
+@requires_access_level('Admin')
 def export_users():
     """send xlsx file with valid users
     TODO: has troubles with updating template in same session, if db is changed and xlsx file is exported in same session
@@ -139,10 +139,10 @@ def export_users():
     worksheet.write(0, 4, '3.Student', bold)
     row = 1
     col = 0
-    users = db.session.query(User).all()
+    users = db.session.query(User).filter(User._rights != 'Admin').all()
 
     for user in users:
-
+        print(user.user_name)
         worksheet.write(row, col, user.user_name)
         worksheet.write(row, col + 1, user._password)
         worksheet.write(row, col + 2, user.student1)
@@ -157,9 +157,9 @@ def export_users():
 
 
 @users_routes.route('/generate_user', methods=['GET', 'POST'])
-#@requires_access_level('admin')
+@requires_access_level('Admin')
 def generate_user():
-
+    """Generate a single user by filling out form"""
     form = GenerateUser(request.form)
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -177,15 +177,15 @@ def generate_user():
 
 
 @users_routes.route('/users')
-#@requires_access_level('admin')
+@requires_access_level('Admin')
 def users():
     """Overview as table of all registered users"""
-    users = User.query.all()
+    users = User.query.filter(User._rights != 'Admin').all()
     return render_template('users/users.html', users=users)
 
 
 @users_routes.route('/user')
-#@requires_access_level('admin')
+@requires_access_level('Admin')
 def user():
     """Detailed view for specific user"""
     try:
@@ -203,7 +203,7 @@ def user():
 
 
 @users_routes.route('/users/remove')
-#@requires_access_level('admin')
+@requires_access_level('Admin')
 def remove_user():
     """Remove user without cascading deletion of inserted measurements"""
     user_id = request.args.get('id', type=int)

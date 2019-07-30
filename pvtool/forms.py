@@ -78,6 +78,7 @@ class MeasurementForm(BaseForm):
     mess_datum = StringField('Messdatum')
     pv_modul = SelectField('PV Modul')
     messungen = FileField(validators=[FileRequired()])
+    submit = SubmitField('Messungen hinzufügen')
 
 
 class PlotterForm(BaseForm):

@@ -7,6 +7,7 @@ from ..db import PvModule, FlasherData, ManufacturerData, db
 
 from ..forms import PvModuleForm, FlasherDataForm, ManufacturerDataForm
 from ..file_upload import process_pv_module_file, UPLOAD_FOLDER
+from ._users import requires_access_level
 
 pv_modules_routes = Blueprint('pv', __name__, template_folder='templates')
 
@@ -36,8 +37,9 @@ def pv_module():
 
 
 @pv_modules_routes.route('/pv_modules/add', methods=['GET', 'POST'])
+@requires_access_level('Admin')
 def add_pv_module():
-    """Add individual module by filling out form"""
+    """DEPRECATED: Add individual module by filling out form"""
     form = PvModuleForm()
     if request.method == 'POST':
         new_pv_module = PvModule(model=form.modellnummer.data,
@@ -57,6 +59,7 @@ def add_pv_module():
 
 
 @pv_modules_routes.route('/pv_modules/add_data', methods=['GET', 'POST'])
+@requires_access_level('Admin')
 def add_pv_module_data():
     """Add data to chosen module with form"""
     form_flasher = FlasherDataForm()
@@ -93,6 +96,7 @@ def add_pv_module_data():
 
 
 @pv_modules_routes.route('/pv_modules/add_multiple_modules', methods=['GET','POST'])
+@requires_access_level('Admin')
 def add_multiple_pv_modules():
     """Upload csv, xls or xlsx with complete values"""
     form = PvModuleForm()
@@ -108,6 +112,7 @@ def add_multiple_pv_modules():
 
 
 @pv_modules_routes.route('/pv_modules/edit', methods=['GET', 'POST'])
+@requires_access_level('Admin')
 def edit_pv_module():
     """change values of pvmodule
     TODO: Fix it to populate files with already inserted values or remove
@@ -123,6 +128,7 @@ def edit_pv_module():
 
 
 @pv_modules_routes.route('/pv_modules/remove')
+@requires_access_level('Admin')
 def remove_pv_module():
     """Remove chosen PvModule and its associated measurements"""
     pv_id = request.args.get('id', type=int)

@@ -23,8 +23,13 @@
 
     </tbody>
 </table>
+
+<a href="{{ url_for('measurement.measurements') }}" class="btn btn-primary">Alle Messungen anzeigen</a>
+<a href="{{ url_for('data.data', id=measurement.id)}}" class="btn btn-info">Visualisierung</a>
+<a href="{{ url_for('measurement.remove_measurement', id=measurement.id)}}" class="btn btn-danger">Messung entfernen</a>
+
 <div class="row">
-    <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+    <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample" style="margin-top:10pt">
     Messwerte anzeigen
     </button>
     <table class="table table-bordered table-hovered collapse" id="collapseExample">
@@ -56,12 +61,5 @@
         </tbody>
     </table>
 </div>
-
-<div class="row">
-    <a href="{{ url_for('measurement.measurements') }}" class="btn btn-primary">Alle Messungen anzeigen</a>
-    <a href="{{ url_for('data.data', id=measurement.id)}}" class="btn btn-info">Visualisierung</a>
-    <a href="{{ url_for('measurement.remove_measurement', id=measurement.id)}}" class="btn btn-danger">Messung entfernen</a>
-</div>
-
 
 {% endblock %}

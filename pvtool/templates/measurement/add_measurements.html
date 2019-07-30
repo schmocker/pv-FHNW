@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% from '_formhelpers.html' import render_field %}
+{% block content %}
+
+    <h1>Mehrere Messungen hinzufügen</h1>
+    <form action="" method="post" novalidate enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="form-group col-4">
+            {{ form.messungen.label }} {{ form.messungen(**{"class":"form-control-file"}) }}
+        </div>
+        <div class="form-group"> {{ form.submit(**{"class":"btn-primary"}) }}</div>
+    </form>
+
+{% endblock %}

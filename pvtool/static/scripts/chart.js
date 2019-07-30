@@ -78,14 +78,6 @@ $(function(){
         $('#mess_reihe').change(function(){
             update_chart(scatterChart);
         });
-
-        $('#stc_temp').change(function(){
-            update_chart(scatterChart);
-        });
-
-        $('#stc_rad').change(function(){
-            update_chart(scatterChart);
-        });
     });
 });
 
@@ -108,7 +100,7 @@ function update_chart(chart) {
                 let data_U_P_STC = json['data_u_p_stc']
                 let data_U_I_STC = json['data_u_i_stc']
 
-                let chart_data = {datasets: [{label:   'Messung U',
+                let chart_data = {datasets: [{label:   'Messung U-I',
                                                 xAxisID: 'ax_U',
                                                 yAxisID: 'ax_I',
                                                 data:    data_U_I,
@@ -117,14 +109,14 @@ function update_chart(chart) {
                                                 type: 'bubble',
                                                 },
                                                {
-                                                label:   'Messung P',
+                                                label:   'Messung U-P',
                                                 xAxisID: 'ax_U',
                                                 yAxisID: 'ax_P',
                                                 data:    data_U_P,
                                                 borderColor: 'rgba(153, 102, 255, 1)',
                                                 type: 'bubble',
                                                 },
-                                                {label:   'Messung U in STC',
+                                                {label:   'Messung U-I in STC',
                                                 xAxisID: 'ax_U',
                                                 yAxisID: 'ax_I',
                                                 data:    data_U_I_STC,
@@ -133,7 +125,7 @@ function update_chart(chart) {
                                                 type: 'bubble',
                                                 },
                                                {
-                                                label:   'Messung P in STC',
+                                                label:   'Messung U-P in STC',
                                                 xAxisID: 'ax_U',
                                                 yAxisID: 'ax_P',
                                                 data:    data_U_P_STC,
@@ -183,6 +175,27 @@ function update_chart(chart) {
                                                 radius: '0'  ,
                                                 fill: 'false',
                                                 },
+                                                {label: "Flasher U-I in STC",
+                                                function: function(x){ return voltage_current_function_flasher_stc(x,json)},
+                                                borderColor: "rgba(50, 53, 20, 1)",
+                                                data: [],
+                                                xAxisID: 'ax_U',
+                                                yAxisID: 'ax_I',
+                                                type: 'line',
+                                                radius: '0',
+                                                fill: 'false',
+                                                },
+
+                                                {label: "Flasher U-P in STC",
+                                                function: function(x){ return voltage_power_function_flasher_stc(x,json)},
+                                                borderColor: "rgba(21, 255, 255, 1)",
+                                                data: [],
+                                                xAxisID: 'ax_U',
+                                                yAxisID: 'ax_P',
+                                                type: 'line',
+                                                radius: '0'  ,
+                                                fill: 'false',
+                                                },
                                                 ]
                                  };
                 Chart.pluginService.register({
@@ -199,7 +212,7 @@ function update_chart(chart) {
 
                         var increment = (max_volt-min_volt)/100;
 
-                        for(var i = 4; i <= 7; i++)
+                        for(var i = 4; i <= 9; i++)
                         {
                             var result = [];
                             for( var j = 0; j<100; j++)
@@ -275,6 +288,23 @@ function voltage_current_function_flasher(x,json)
 function voltage_power_function_flasher(x, json)
 {
     return x * voltage_current_function_flasher(x, json);
+}
+
+function voltage_current_function_flasher_stc(x,json)
+{
+    let i_sc = json['flasher_data_stc']['_I_sc_f'];
+    let i_mpp = json['flasher_data_stc']['_I_mpp_f'];
+    let u_oc = json['flasher_data_stc']['_U_oc_f'];
+    let u_mpp = json['flasher_data_stc']['_U_mpp_f'];
+
+    let c_2 = Math.log(1-(i_mpp/i_sc)) / (u_mpp-u_oc);
+    let c_1 =i_sc * Math.exp(-c_2*u_oc);
+    return i_sc - c_1 * Math.exp(c_2 * x);
+}
+
+function voltage_power_function_flasher_stc(x, json)
+{
+    return x * voltage_current_function_flasher_stc(x, json);
 }
 
 function get_intersection_with_x_axis(json)

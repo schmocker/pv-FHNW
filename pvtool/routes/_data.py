@@ -52,6 +52,7 @@ def data():
 @data_routes.route('/data/template')
 def template():
     """Send template to user were measurement_values are to be inserted."""
+    print("heeeeelllo")
     data = MeasurementValues.get_xlsx_template()
     return send_file(data, attachment_filename="template.xlsx", as_attachment=True)
 
@@ -99,6 +100,7 @@ def query_results():
     flasher_data = flasher_data.__dict__
     flasher_data.pop("_sa_instance_state")
     meas['flasher_data'] = flasher_data
+    meas['flasher_data_stc'] = {}
 
     meas['data_u_i'] = [{'x': d.U_module.magnitude, 'y': d.I_module.magnitude} for d in measurement_values]
     meas['data_u_p'] = [{'x': d.U_module.magnitude, 'y': d.P_module.magnitude} for d in measurement_values]
@@ -175,6 +177,31 @@ def query_modules():
 
 @data_routes.route('/_query_module_data')
 def query_module_data():
+    """Query db with module_id to obtain corresponding flasher and manufacturer data
+    """
+    module_id = request.args.get('pv_module_id', type=str)
+    query = {}
+
+    if module_id is not None:
+        query["id"] = module_id
+
+    flasher_data = FlasherData.query.filter_by(**query).first()
+    manufacturer_data = ManufacturerData.query.filter_by(**query).first()
+
+    flasher_data = flasher_data.__dict__
+    flasher_data.pop("_sa_instance_state")
+
+    manufacturer_data = manufacturer_data.__dict__
+    manufacturer_data.pop("_sa_instance_state")
+
+    result = {'flasher_data': flasher_data,
+              'manufacturer_data': manufacturer_data
+              }
+    return jsonify(result)
+
+
+@data_routes.route('/_query_available_measurements')
+def query_available_measurements():
     """Query db with module_id to obtain corresponding flasher and manufacturer data
     """
     module_id = request.args.get('pv_module_id', type=str)

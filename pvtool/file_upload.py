@@ -33,7 +33,7 @@ def process_data_file(filename, linked_measurement):
     try:
         with open(path_to_file) as f:
             if filename.endswith('.csv'):
-                dataframe = pd.read_csv(f, sep=',', encoding='utf-8')
+                dataframe = pd.read_csv(f, sep=';', encoding='utf-8')
             elif filename.endswith(('.xls', '.xlsx')):
                 dataframe = pd.read_excel(path_to_file)
             else:
@@ -52,10 +52,21 @@ def process_pv_module_file(filename):
     path_to_file = os.path.join(UPLOAD_FOLDER, filename)
     with open(path_to_file) as f:
         if filename.endswith('.csv'):
-            dataframe = pd.read_csv(f, sep=',')
+            dataframe = pd.read_csv(f, sep=';', encoding='utf-8')
         elif filename.endswith(('.xls', '.xlsx')):
             dataframe = pd.read_excel(path_to_file)
     commit_pvmodule_to_database(dataframe)
+    os.remove(path_to_file)
+
+
+def process_multiple_measurements_file(filename):
+    path_to_file = os.path.join(UPLOAD_FOLDER, filename)
+    with open(path_to_file) as f:
+        if filename.endswith('.csv'):
+            dataframe = pd.read_csv(f, sep=';', encoding='utf-8-sig')
+        elif filename.endswith(('.xls', '.xlsx')):
+            dataframe = pd.read_excel(path_to_file)
+    commit_measurement_files_to_database(dataframe)
     os.remove(path_to_file)
 
 
@@ -109,6 +120,41 @@ def commit_measurement_values_to_database(df, linked_measurement):
         db.session.commit()
     except:
         flash('Failed commit_measurement_to_database', category='danger')
+
+
+def commit_measurement_files_to_database(df):
+    """process dataframe from file with multiple measurements"""
+    measurements = {}
+    columns_for_values = ['Wetter', 'U [V]', 'U_Shunt [V]', 'U_T_amb [V]', 'U_G_hor [V]', 'U_G_pan [V]', 'U_G_ref [V]', 'U_T_pan [V]']
+    columns_for_measurement = ['PV_Modul', 'Datum', 'Messreihe', 'Erfasser']
+
+    # ugly code for quick fix, sorry!
+    for column in columns_for_measurement:
+        df[column] = df[column].astype(str)
+    df['Wetter'] = df['Wetter'].astype(str)
+
+    # create individual dataframes out of all measurements in dataframe
+    for name, group in df.groupby(columns_for_measurement):
+        measurements['group_' + str(name)] = group
+
+        dict_for_measurement = group[columns_for_measurement].to_dict(orient='index')
+        dict_for_measurement = list(dict_for_measurement.values())[0]
+
+        dict_for_insertion = {}
+        dict_for_insertion['date'] = dict_for_measurement['Datum']
+        dict_for_insertion['producer'] = dict_for_measurement['Messreihe']
+        dict_for_insertion['measurement_series'] = dict_for_measurement['Erfasser']
+        pv_module_number = dict_for_measurement['PV_Modul'].split(': ')[1]
+
+        #dict_for_measurement['pv_module_id'] = db.session.query(PvModule).filter(PvModule.model == pv_module_number).first()
+
+        new_measurement = Measurement(**dict_for_insertion)
+        chosen_module = db.session.query(PvModule).filter(PvModule.model == pv_module_number).first()
+
+        chosen_module.measurements.append(new_measurement)
+
+        measurement_values = 8
+        commit_measurement_values_to_database(group[columns_for_values], new_measurement)
 
 
 def commit_pvmodule_to_database(df):

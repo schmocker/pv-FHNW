@@ -1,13 +1,14 @@
 """Visualization of different measurements and API to return measurements as JSON"""
 from flask import Blueprint, render_template, request, send_file, jsonify
 from flask_login import login_required
+from ._users import requires_access_level
 from ..db import Measurement, MeasurementValues, PvModule, FlasherData, ManufacturerData
 from ..forms import PlotterForm
 data_routes = Blueprint('data', __name__, template_folder='templates')
 
 
 @data_routes.route('/data', methods=['GET', 'POST'])
-@login_required
+@requires_access_level('Admin')
 def data():
     """Plot the functions U-I and U-P with buttons to query different measurements"""
     meas_id = request.args.get('id', type=int)
@@ -32,6 +33,15 @@ def data():
 
     data = MeasurementValues.query.filter(MeasurementValues.measurement_id == meas_id)
 
+    if meas_id:
+        pv_module = str(Measurement.query.filter(Measurement.id == meas_id).first().pv_module.manufacturer) + ' ' + Measurement.query.filter(Measurement.id == meas_id).first().pv_module.model
+        date = Measurement.query.filter(Measurement.id == meas_id).first().date
+        measurement_series = Measurement.query.filter(Measurement.id == meas_id).first().measurement_series
+    else:
+        pv_module = ' '
+        date = ' '
+        measurement_series = ' '
+    # legacy
     data_U_I = [{'x': d.U_module.magnitude, 'y': d.I_module.magnitude} for d in data]
     data_U_P = [{'x': d.U_module.magnitude, 'y': d.P_module.magnitude} for d in data]
     chart_data = {'datasets': [{'label':   'U',
@@ -45,11 +55,15 @@ def data():
                                 'yAxisID': 'ax_P',
                                 'data':    data_U_P
                                 },
-                               ]}
+                               ],
+                  'pv_module': pv_module,
+                  'date': date,
+                  'measurement_series': measurement_series}
     return render_template('data/data.html', data=data, chart_data=chart_data, form=plot_form)
 
 
 @data_routes.route('/data/template')
+@requires_access_level('Admin')
 def template():
     """Send template to user were measurement_values are to be inserted."""
     print("heeeeelllo")
@@ -57,7 +71,8 @@ def template():
     return send_file(data, attachment_filename="template.xlsx", as_attachment=True)
 
 
-@data_routes.route('/_query_results')
+@data_routes.route('/_query_results')$
+@requires_access_level('Admin')
 def query_results():
     """Returns module which was queried and its u_i and u_p values for plot and flasher, manufacturer
     data of corresponding module"""
@@ -114,6 +129,7 @@ def query_results():
 
 
 @data_routes.route('/_query_data')
+@requires_access_level('Admin')
 def query_data():
     """API function which returns a measurement as queried by id"""
     meas_series = request.args.get('measurement_id', type=str)
@@ -134,6 +150,7 @@ def query_data():
 
 
 @data_routes.route('/_query_data_u_i_u_p')
+@requires_access_level('Admin')
 def query_data_u_i_u_p():
     """get a measurement by id and return its U-I data and U-P data"""
     meas_series = request.args.get('measurement_id', type=str)
@@ -151,6 +168,7 @@ def query_data_u_i_u_p():
 
 
 @data_routes.route('/_query_modules')
+@requires_access_level('Admin')
 def query_modules():
     """Query database with model and manufacturer to receive JSON with corresponding modules
        Syntax: ROOT_DOMAIN/_query_modules?model=modelname&manufacturer=manufacturer_name
@@ -176,6 +194,7 @@ def query_modules():
 
 
 @data_routes.route('/_query_module_data')
+@requires_access_level('Admin')
 def query_module_data():
     """Query db with module_id to obtain corresponding flasher and manufacturer data
     """
@@ -201,6 +220,7 @@ def query_module_data():
 
 
 @data_routes.route('/_query_available_measurements')
+@requires_access_level('Admin')
 def query_available_measurements():
     """Query db with module_id to obtain corresponding flasher and manufacturer data
     """

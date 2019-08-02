@@ -50,6 +50,7 @@ def remove_measurement():
 
 
 @measurement_routes.route('/upload', methods=['GET', 'POST'])
+@requires_access_level('Admin')
 def upload_file():
     """Legacy function
     TODO: REMOVE

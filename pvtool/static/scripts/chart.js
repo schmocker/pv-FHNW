@@ -65,7 +65,9 @@ $(function(){
 //                        }
                     },
                 });
-
+    console.log('Arrived here')
+    setOptionsGivenByMeasurementID(chart_data['pv_module'], chart_data['date'], chart_data['measurement_series'])
+    update_chart(scatterChart)
     $(document).ready(function() {
         $('#datum').change(function(){
             update_chart(scatterChart);
@@ -83,7 +85,7 @@ $(function(){
 
 function update_chart(chart) {
     chosen_values = getArgumentsFromSelectFields();
-
+    console.log(chosen_values)
     $.getJSON('/_query_results',
         {
         date: chosen_values.date,
@@ -175,27 +177,7 @@ function update_chart(chart) {
                                                 radius: '0'  ,
                                                 fill: 'false',
                                                 },
-                                                {label: "Flasher U-I in STC",
-                                                function: function(x){ return voltage_current_function_flasher_stc(x,json)},
-                                                borderColor: "rgba(50, 53, 20, 1)",
-                                                data: [],
-                                                xAxisID: 'ax_U',
-                                                yAxisID: 'ax_I',
-                                                type: 'line',
-                                                radius: '0',
-                                                fill: 'false',
-                                                },
 
-                                                {label: "Flasher U-P in STC",
-                                                function: function(x){ return voltage_power_function_flasher_stc(x,json)},
-                                                borderColor: "rgba(21, 255, 255, 1)",
-                                                data: [],
-                                                xAxisID: 'ax_U',
-                                                yAxisID: 'ax_P',
-                                                type: 'line',
-                                                radius: '0'  ,
-                                                fill: 'false',
-                                                },
                                                 ]
                                  };
                 Chart.pluginService.register({
@@ -290,23 +272,6 @@ function voltage_power_function_flasher(x, json)
     return x * voltage_current_function_flasher(x, json);
 }
 
-function voltage_current_function_flasher_stc(x,json)
-{
-    let i_sc = json['flasher_data_stc']['_I_sc_f'];
-    let i_mpp = json['flasher_data_stc']['_I_mpp_f'];
-    let u_oc = json['flasher_data_stc']['_U_oc_f'];
-    let u_mpp = json['flasher_data_stc']['_U_mpp_f'];
-
-    let c_2 = Math.log(1-(i_mpp/i_sc)) / (u_mpp-u_oc);
-    let c_1 =i_sc * Math.exp(-c_2*u_oc);
-    return i_sc - c_1 * Math.exp(c_2 * x);
-}
-
-function voltage_power_function_flasher_stc(x, json)
-{
-    return x * voltage_current_function_flasher_stc(x, json);
-}
-
 function get_intersection_with_x_axis(json)
 {
     let i_sc = json['manufacturer_data']['_I_sc_m'];
@@ -319,3 +284,18 @@ function get_intersection_with_x_axis(json)
     console.log("the interseciton", Math.log(i_sc/c_1)/c_2);
     return Math.log(i_sc/c_1)/c_2;
 }
+
+function setOptionsGivenByMeasurementID(pv_module, date, measurement_series)
+{
+    let element = document.getElementById('pv_modul')
+    element.value = pv_module
+
+    element = document.getElementById('datum')
+    element.value = date
+
+    element = document.getElementById('mess_reihe')
+    element.value = measurement_series
+}
+
+
+

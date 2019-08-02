@@ -27,7 +27,7 @@ def internal_server_error(e):
 
 @main_routes.route('/pv_at_fhnw')
 def pv_at_fhnw():
-    """TODO: Remove this function"""
+    """ Integration of SolarLog IFrame"""
     return render_template('main/pv_at_fhnw.html')
 
 

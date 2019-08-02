@@ -65,9 +65,11 @@ $(function(){
 //                        }
                     },
                 });
-    console.log('Arrived here')
-    setOptionsGivenByMeasurementID(chart_data['pv_module'], chart_data['date'], chart_data['measurement_series'])
-    update_chart(scatterChart)
+    console.log('Arrived here');
+    console.log('first',getArgumentsFromSelectFields());
+    setOptionsGivenByMeasurementID(chart_data['pv_module'], chart_data['date'], chart_data['measurement_series']);
+    console.log('second',getArgumentsFromSelectFields());
+    update_chart(scatterChart);
     $(document).ready(function() {
         $('#datum').change(function(){
             update_chart(scatterChart);
@@ -85,7 +87,6 @@ $(function(){
 
 function update_chart(chart) {
     chosen_values = getArgumentsFromSelectFields();
-    console.log(chosen_values)
     $.getJSON('/_query_results',
         {
         date: chosen_values.date,
@@ -95,7 +96,6 @@ function update_chart(chart) {
         stc_rad : chosen_values.stc_rad
         },
             function(json){
-                console.log(json);
                 let data_U_P = json['data_u_p']
                 let data_U_I = json['data_u_i']
 
@@ -194,7 +194,7 @@ function update_chart(chart) {
 
                         var increment = (max_volt-min_volt)/100;
 
-                        for(var i = 4; i <= 9; i++)
+                        for(var i = 4; i <= 7; i++)
                         {
                             var result = [];
                             for( var j = 0; j<100; j++)
@@ -225,16 +225,11 @@ function getArgumentsFromSelectFields(){
 
     let c = document.getElementById('pv_modul')
     let chosen_model_id = c.options[c.selectedIndex].value
-//    let stc_temp = document.getElementById('stc_temp').value
-//
-//    let stc_rad = document.getElementById('stc_rad').value
 
     return {
         meas_series : chosen_meas_series,
         date : chosen_date,
         model_id : chosen_model_id,
-//        stc_temp : stc_temp,
-//        stc_rad : stc_rad
     }
 }
 
@@ -281,20 +276,41 @@ function get_intersection_with_x_axis(json)
 
     let c_2 = Math.log(1-(i_mpp/i_sc)) / (u_mpp-u_oc);
     let c_1 =i_sc * Math.exp(-c_2*u_oc);
-    console.log("the interseciton", Math.log(i_sc/c_1)/c_2);
     return Math.log(i_sc/c_1)/c_2;
 }
 
+// Dear Coder, sorry for the ugly code, it was my last day
 function setOptionsGivenByMeasurementID(pv_module, date, measurement_series)
 {
-    let element = document.getElementById('pv_modul')
-    element.value = pv_module
+    let element = document.getElementById('pv_modul');
+    for( i = 0; i < element.length ; i++ )
+    {
+        if(element.options[i].text == 'pv_module')
+        {
+            element.selectedIndex = i;
+            break;
+        }
+    }
 
-    element = document.getElementById('datum')
-    element.value = date
+    element = document.getElementById('datum');
+    for( i = 0; i < element.length ; i++ )
+    {
+        if(element.options[i].text == date)
+        {
+            element.selectedIndex = i + 1;
+            break;
+        }
+    }
 
-    element = document.getElementById('mess_reihe')
-    element.value = measurement_series
+    element = document.getElementById('mess_reihe');
+    for( i = 0; i < element.length ; i++ )
+    {
+        if(element.options[i].text == measurement_series)
+        {
+            element.selectedIndex = i + 1;
+            break;
+        }
+    }
 }
 
 

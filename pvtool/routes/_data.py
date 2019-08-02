@@ -71,7 +71,7 @@ def template():
     return send_file(data, attachment_filename="template.xlsx", as_attachment=True)
 
 
-@data_routes.route('/_query_results')$
+@data_routes.route('/_query_results')
 @requires_access_level('Admin')
 def query_results():
     """Returns module which was queried and its u_i and u_p values for plot and flasher, manufacturer

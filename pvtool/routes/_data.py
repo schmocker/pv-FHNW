@@ -94,38 +94,41 @@ def query_results():
 
     meas = Measurement.query.filter_by(**query).first()
 
-    meas = meas.__dict__
-    measurement_values = MeasurementValues.query.filter_by(measurement_id=meas['id']).all()
+    if meas:
+        meas = meas.__dict__
+        measurement_values = MeasurementValues.query.filter_by(measurement_id=meas['id']).all()
 
-    flasher_data = FlasherData.query.filter_by(pv_module_id=meas['pv_module_id']).first()
-    manufacturer_data = ManufacturerData.query.filter_by(pv_module_id=meas['pv_module_id']).first()
+        flasher_data = FlasherData.query.filter_by(pv_module_id=meas['pv_module_id']).first()
+        manufacturer_data = ManufacturerData.query.filter_by(pv_module_id=meas['pv_module_id']).first()
 
-    if stc_temp and stc_rad:
-        meas['manufacturer_data'] = manufacturer_data.get_stc_values(stc_rad, stc_temp)
-        manufacturer_data = manufacturer_data.__dict__
-        manufacturer_data.pop("_sa_instance_state")
-        meas['manufacturer_data']['_ff_m'] = manufacturer_data['_ff_m']
-        meas['manufacturer_data']['id'] = manufacturer_data['id']
-        meas['manufacturer_data']['pv_module_id'] = manufacturer_data['pv_module_id']
+        if stc_temp and stc_rad:
+            meas['manufacturer_data'] = manufacturer_data.get_stc_values(stc_rad, stc_temp)
+            manufacturer_data = manufacturer_data.__dict__
+            manufacturer_data.pop("_sa_instance_state")
+            meas['manufacturer_data']['_ff_m'] = manufacturer_data['_ff_m']
+            meas['manufacturer_data']['id'] = manufacturer_data['id']
+            meas['manufacturer_data']['pv_module_id'] = manufacturer_data['pv_module_id']
+        else:
+            manufacturer_data = manufacturer_data.__dict__
+            manufacturer_data.pop("_sa_instance_state")
+            meas['manufacturer_data'] = manufacturer_data
+
+        flasher_data = flasher_data.__dict__
+        flasher_data.pop("_sa_instance_state")
+        meas['flasher_data'] = flasher_data
+        meas['flasher_data_stc'] = {}
+
+        meas['data_u_i'] = [{'x': d.U_module.magnitude, 'y': d.I_module.magnitude} for d in measurement_values]
+        meas['data_u_p'] = [{'x': d.U_module.magnitude, 'y': d.P_module.magnitude} for d in measurement_values]
+
+        meas['data_u_i_stc'] = [{'x': d.U_module_stc.magnitude, 'y': d.I_module_stc.magnitude} for d in measurement_values]
+        meas['data_u_p_stc'] = [{'x': d.U_module_stc.magnitude, 'y': d.P_module_stc.magnitude} for d in measurement_values]
+
+        meas.pop('_sa_instance_state')
+
+        return jsonify(meas)
     else:
-        manufacturer_data = manufacturer_data.__dict__
-        manufacturer_data.pop("_sa_instance_state")
-        meas['manufacturer_data'] = manufacturer_data
-
-    flasher_data = flasher_data.__dict__
-    flasher_data.pop("_sa_instance_state")
-    meas['flasher_data'] = flasher_data
-    meas['flasher_data_stc'] = {}
-
-    meas['data_u_i'] = [{'x': d.U_module.magnitude, 'y': d.I_module.magnitude} for d in measurement_values]
-    meas['data_u_p'] = [{'x': d.U_module.magnitude, 'y': d.P_module.magnitude} for d in measurement_values]
-
-    meas['data_u_i_stc'] = [{'x': d.U_module_stc.magnitude, 'y': d.I_module_stc.magnitude} for d in measurement_values]
-    meas['data_u_p_stc'] = [{'x': d.U_module_stc.magnitude, 'y': d.P_module_stc.magnitude} for d in measurement_values]
-
-    meas.pop('_sa_instance_state')
-
-    return jsonify(meas)
+        return jsonify([])
 
 
 @data_routes.route('/_query_data')

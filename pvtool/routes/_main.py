@@ -19,10 +19,10 @@ def page_not_found(e):
 
 
 @main_routes.errorhandler(500)
-def internal_server_error(e):
+def internal_server_error():
     """error handler for internal server error"""
-    flash(e.description, 'danger')
-    return render_template('main/500.html'), 500, 'hallo'
+    flash('Diese Funktion ist zur Zeit nicht verfügbar.', category='info')
+    return render_template('main/500.html'), 500
 
 
 @main_routes.route('/pv_at_fhnw')

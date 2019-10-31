@@ -49,33 +49,6 @@ def remove_measurement():
     return redirect('/measurements')
 
 
-@measurement_routes.route('/upload', methods=['GET', 'POST'])
-@requires_access_level('Admin')
-def upload_file():
-    """Legacy function
-    TODO: REMOVE
-    """
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            flash('file chosen')
-            process_file('MEASUREMENT', filename)
-            # return redirect(url_for('uploaded_file',
-            #                         filename=filename))
-    return render_template('main/upload.html')
-
-
 @measurement_routes.route('/add_measurement', methods=['GET', 'POST'])
 @login_required
 def add_measurement():
@@ -93,7 +66,8 @@ def add_measurement():
     form.pv_modul.choices = []
 
     # Every user can only insert one measurement
-    if db.session.query(Measurement).filter(Measurement.measurement_series == user['meas_series']).first() is not None:
+    if db.session.query(Measurement).filter(Measurement.measurement_series == user['meas_series']).first() is not None\
+            and user['meas_series'] != 'admin':
         print(db.session.query(Measurement).filter(Measurement.measurement_series == user['meas_series']).first())
         flash('Sie haben bereits eine Messung hinzugefügt.', category='danger')
         return redirect(url_for('measurement.measurements'))

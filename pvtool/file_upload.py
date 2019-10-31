@@ -24,50 +24,67 @@ def allowed_file(filename):
 def handle_invalid_file_type(path_to_file):
     flash('Ungültiges Dateiformat', category='danger')
     os.remove(path_to_file)
-    raise InvalidFileType('Invalid file type was inserted')
+    #raise InvalidFileType('Invalid file type was inserted')
 
 
 def process_data_file(filename, linked_measurement):
     """open the file containing data and pass table as pandas dataframe with measurement to be linked"""
     path_to_file = os.path.join(UPLOAD_FOLDER, filename)
+    if not allowed_file(filename):
+        handle_invalid_file_type(path_to_file)
+        raise InvalidFileType
     try:
         with open(path_to_file) as f:
             if filename.endswith('.csv'):
                 dataframe = pd.read_csv(f, sep=';', encoding='utf-8')
             elif filename.endswith(('.xls', '.xlsx')):
                 dataframe = pd.read_excel(path_to_file)
-            else:
-                handle_invalid_file_type(path_to_file)
-                return
             commit_measurement_values_to_database(dataframe, linked_measurement)
         os.remove(path_to_file)
     except InvalidTemplate:
         flash('Hochgeladene Messwerte sind ungültig.', category='danger')
-        raise InvalidFileType
+        handle_invalid_file_type(path_to_file)
     except FileNotFoundError:
-        internal_server_error()
+        flash('Hochladen der Messung fehlgeschlagen.', category='danger')
 
 
 def process_pv_module_file(filename):
+    """open the file containing pvmodule and pass table as pandas dataframe with pvmodules to be linked"""
     path_to_file = os.path.join(UPLOAD_FOLDER, filename)
-    with open(path_to_file) as f:
-        if filename.endswith('.csv'):
-            dataframe = pd.read_csv(f, sep=';', encoding='utf-8')
-        elif filename.endswith(('.xls', '.xlsx')):
-            dataframe = pd.read_excel(path_to_file)
-    commit_pvmodule_to_database(dataframe)
-    os.remove(path_to_file)
+    if not allowed_file(filename):
+        handle_invalid_file_type(path_to_file)
+    try:
+        with open(path_to_file) as f:
+            if filename.endswith('.csv'):
+                dataframe = pd.read_csv(f, sep=';', encoding='utf-8')
+            elif filename.endswith(('.xls', '.xlsx')):
+                dataframe = pd.read_excel(path_to_file)
+        commit_pvmodule_to_database(dataframe)
+        os.remove(path_to_file)
+    except InvalidTemplate:
+        flash('Hochgeladene Messwerte sind ungültig.', category='danger')
+        handle_invalid_file_type(path_to_file)
+    except FileNotFoundError:
+        flash('Hochladen der Messung fehlgeschlagen.', category='danger')
 
 
 def process_multiple_measurements_file(filename):
     path_to_file = os.path.join(UPLOAD_FOLDER, filename)
-    with open(path_to_file) as f:
-        if filename.endswith('.csv'):
-            dataframe = pd.read_csv(f, sep=';', encoding='utf-8-sig')
-        elif filename.endswith(('.xls', '.xlsx')):
-            dataframe = pd.read_excel(path_to_file)
-    commit_measurement_files_to_database(dataframe)
-    os.remove(path_to_file)
+    if not allowed_file(filename):
+        handle_invalid_file_type(path_to_file)
+    try:
+        with open(path_to_file) as f:
+            if filename.endswith('.csv'):
+                dataframe = pd.read_csv(f, sep=';', encoding='utf-8')
+            elif filename.endswith(('.xls', '.xlsx')):
+                dataframe = pd.read_excel(path_to_file)
+        commit_measurement_files_to_database(dataframe)
+        os.remove(path_to_file)
+    except InvalidTemplate:
+        flash('Hochgeladene Messwerte sind ungültig.', category='danger')
+        handle_invalid_file_type(path_to_file)
+    except FileNotFoundError:
+        flash('Hochladen der Messung fehlgeschlagen.', category='dangeer')
 
 
 def get_columns_of_table(type_of_data):

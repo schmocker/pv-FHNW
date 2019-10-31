@@ -19,7 +19,7 @@ def page_not_found(e):
 
 
 @main_routes.errorhandler(500)
-def internal_server_error():
+def internal_server_error(e):
     """error handler for internal server error"""
     flash('Diese Funktion ist zur Zeit nicht verfügbar.', category='info')
     return render_template('main/500.html'), 500

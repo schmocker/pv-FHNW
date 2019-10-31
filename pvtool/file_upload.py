@@ -5,7 +5,7 @@ import configparser
 from flask import flash
 from .routes._main import internal_server_error
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'pvtool/files')
+UPLOAD_FOLDER = os.path.join('/var/www/pv-FHNW/', 'pvtool/files')
 ALLOWED_EXTENSIONS = set(['csv', 'xls', 'xlsx'])
 
 

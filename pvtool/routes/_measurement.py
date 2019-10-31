@@ -88,6 +88,11 @@ def add_measurement():
         # if form.validate_on_submit():
         f = form.messungen.data
         filename = secure_filename(f.filename)
+
+        if not allowed_file(filename):
+            flash('Ungültiges Dateiformat.', category='danger')
+            return redirect(url_for('measurement.measurements'))
+
         f.save(os.path.join(UPLOAD_FOLDER, filename))
 
         chosen_module.measurements.append(new_measurement)
@@ -120,6 +125,10 @@ def add_measurements():
         f = form.messungen.data
 
         filename = secure_filename(f.filename)
+        if not allowed_file(filename):
+            flash('Ungültiges Dateiformat.', category='danger')
+            return redirect(url_for('measurement.measurements'))
+
         path_to_file = os.path.join(UPLOAD_FOLDER, filename)
         f.save(path_to_file)
         process_multiple_measurements_file(filename)

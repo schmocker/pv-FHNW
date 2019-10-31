@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, request, redirect, flash, url_for
 from ..db import PvModule, FlasherData, ManufacturerData, db
 
 from ..forms import PvModuleForm, FlasherDataForm, ManufacturerDataForm
-from ..file_upload import process_pv_module_file, UPLOAD_FOLDER
+from ..file_upload import process_pv_module_file, UPLOAD_FOLDER, allowed_file
 from ._users import requires_access_level
 
 pv_modules_routes = Blueprint('pv', __name__, template_folder='templates')
@@ -104,6 +104,11 @@ def add_multiple_pv_modules():
         f = form.pv_modul_file.data
 
         filename = secure_filename(f.filename)
+
+        if not allowed_file(filename):
+            flash('Ungültiges Dateiformat.', category='danger')
+            return redirect(url_for('pv.pv_modules'))
+
         path_to_file = os.path.join(UPLOAD_FOLDER, filename)
         f.save(path_to_file)
         process_pv_module_file(filename)
